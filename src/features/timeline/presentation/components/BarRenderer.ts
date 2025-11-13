@@ -32,6 +32,20 @@ export class BarRenderer {
 		const leftPercent = (startOffset / bounds.totalDays) * 100;
 		const widthPercent = (duration / bounds.totalDays) * 100;
 
+		// Debug logging
+		console.log('BarRenderer positioning:', {
+			title: item.title,
+			startDate: item.startDate.toISOString().split('T')[0],
+			endDate: item.endDate.toISOString().split('T')[0],
+			boundsStart: bounds.start.toISOString().split('T')[0],
+			boundsEnd: bounds.end.toISOString().split('T')[0],
+			totalDays: bounds.totalDays,
+			startOffset: startOffset.toFixed(2),
+			duration: duration.toFixed(2),
+			leftPercent: leftPercent.toFixed(2) + '%',
+			widthPercent: widthPercent.toFixed(2) + '%'
+		});
+
 		bar.style.left = `${leftPercent}%`;
 		// Minimum width of 40px (one day in grid) for readability
 		const minWidthPx = 40;
