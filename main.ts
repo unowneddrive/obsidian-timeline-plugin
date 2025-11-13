@@ -225,14 +225,21 @@ class TimelineView extends ItemView {
 		// Header with controls
 		const header = timelineContainer.createEl('div', { cls: 'gantt-header' });
 		header.createEl('h4', { text: 'Timeline' });
-		const refreshBtn = header.createEl('button', { text: '🔄', cls: 'gantt-refresh-btn' });
-		refreshBtn.addEventListener('click', () => this.renderTimeline());
+
+		const controls = header.createEl('div', { cls: 'gantt-controls' });
+
+		const todayBtn = controls.createEl('button', { text: '📅 Today', cls: 'gantt-today-btn' });
+		const refreshBtn = controls.createEl('button', { text: '🔄', cls: 'gantt-refresh-btn' });
 
 		// Create gantt chart
 		const ganttChart = timelineContainer.createEl('div', { cls: 'gantt-chart' });
 
 		// Timeline area with grid
 		const timelineArea = ganttChart.createEl('div', { cls: 'gantt-timeline' });
+
+		// Setup button handlers
+		refreshBtn.addEventListener('click', () => this.renderTimeline());
+		todayBtn.addEventListener('click', () => this.scrollToToday(timelineArea, bounds));
 
 		// Render time scale
 		this.renderTimeScale(timelineArea, bounds);
@@ -258,6 +265,8 @@ class TimelineView extends ItemView {
 	calculateTimelineBounds(items: TimelineItem[]): { start: Date; end: Date; totalDays: number } | null {
 		let minDate: Date | null = null;
 		let maxDate: Date | null = null;
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
 
 		for (const item of items) {
 			if (item.startDate) {
@@ -268,16 +277,20 @@ class TimelineView extends ItemView {
 			}
 		}
 
-		if (!minDate || !maxDate) return null;
+		// If no items, show timeline around today
+		if (!minDate || !maxDate) {
+			minDate = new Date(today);
+			maxDate = new Date(today);
+		}
 
-		// Add padding
-		const paddingDays = 7;
-		minDate = new Date(minDate.getTime() - paddingDays * 24 * 60 * 60 * 1000);
-		maxDate = new Date(maxDate.getTime() + paddingDays * 24 * 60 * 60 * 1000);
+		// Extend to show 6 months before earliest date and 6 months after latest date
+		const sixMonthsMs = 180 * 24 * 60 * 60 * 1000;
+		const startDate = new Date(Math.min(minDate.getTime() - sixMonthsMs, today.getTime() - sixMonthsMs));
+		const endDate = new Date(Math.max(maxDate.getTime() + sixMonthsMs, today.getTime() + sixMonthsMs));
 
-		const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
+		const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-		return { start: minDate, end: maxDate, totalDays };
+		return { start: startDate, end: endDate, totalDays };
 	}
 
 	renderTimeScale(container: HTMLElement, bounds: { start: Date; end: Date; totalDays: number }) {
@@ -341,6 +354,23 @@ class TimelineView extends ItemView {
 		`;
 
 		return bar;
+	}
+
+	scrollToToday(timelineArea: HTMLElement, bounds: { start: Date; end: Date; totalDays: number }) {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		// Calculate days from start to today
+		const daysFromStart = Math.floor((today.getTime() - bounds.start.getTime()) / (1000 * 60 * 60 * 24));
+
+		// Each day is 40px wide
+		const scrollPosition = daysFromStart * 40;
+
+		// Scroll to position with smooth animation
+		timelineArea.scrollTo({
+			left: scrollPosition - (timelineArea.clientWidth / 2) + 20, // Center today
+			behavior: 'smooth'
+		});
 	}
 
 	formatDate(date: Date): string {

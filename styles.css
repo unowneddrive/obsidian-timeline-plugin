@@ -40,21 +40,31 @@
 	color: var(--text-normal);
 }
 
+.gantt-controls {
+	display: flex;
+	gap: 8px;
+}
+
+.gantt-today-btn,
 .gantt-refresh-btn {
 	background: var(--interactive-accent);
 	border: none;
 	border-radius: 6px;
 	padding: 6px 12px;
 	cursor: pointer;
-	font-size: 1.1em;
+	font-size: 0.95em;
+	font-weight: 500;
+	color: white;
 	transition: opacity 0.2s, transform 0.1s;
 }
 
+.gantt-today-btn:hover,
 .gantt-refresh-btn:hover {
 	opacity: 0.8;
 	transform: scale(1.05);
 }
 
+.gantt-today-btn:active,
 .gantt-refresh-btn:active {
 	transform: scale(0.95);
 }
