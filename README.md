@@ -13,29 +13,41 @@ A plugin for automatically creating timeline visualization of projects and tasks
 
 ## Installation
 
-### For Development
+### From Obsidian Community Store (Coming Soon)
+
+Once published, you'll be able to install directly from Obsidian:
+1. Open Settings → Community plugins
+2. Browse and search for "Timeline Plugin"
+3. Click Install, then Enable
+
+### Manual Installation (For Testing)
+
+**Quick method:**
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/unowneddrive/obsidian-timeline-plugin/releases)
+2. Create folder `YourVault/.obsidian/plugins/timeline-plugin/`
+3. Copy the files into that folder
+4. Reload Obsidian and enable the plugin in Settings
+
+**For detailed instructions, see [Local Installation Guide](docs/LOCAL_INSTALL.md)**
+
+### Development Installation
 
 1. Clone the repository to your vault's plugins folder:
    ```bash
    cd /path/to/your/vault/.obsidian/plugins
-   git clone https://github.com/unowneddrive/obsidian-timeline-plugin
-   cd obsidian-timeline-plugin
+   git clone https://github.com/unowneddrive/obsidian-timeline-plugin timeline-plugin
+   cd timeline-plugin
    ```
 
-2. Install dependencies:
+2. Install dependencies and build:
    ```bash
    npm install
-   ```
-
-3. Build the plugin:
-   ```bash
    npm run build
    ```
 
-4. Reload Obsidian and activate the plugin in settings
+3. Reload Obsidian and enable the plugin in Settings
 
-### Development with Auto-build
-
+**Development mode with auto-rebuild:**
 ```bash
 npm run dev
 ```
@@ -141,7 +153,7 @@ obsidian-timeline-plugin/
 
 ## Publishing to Community Store
 
-Want to publish this plugin to the Obsidian Community Plugins store? See [PUBLISHING.md](PUBLISHING.md) for a complete guide.
+Want to publish this plugin to the Obsidian Community Plugins store? See [Publishing Guide](docs/PUBLISHING.md) for a complete guide.
 
 **Quick steps:**
 1. Build the plugin: `npm run build`
