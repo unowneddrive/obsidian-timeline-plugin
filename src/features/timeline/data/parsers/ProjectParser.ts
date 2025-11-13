@@ -57,6 +57,21 @@ export class ProjectParser {
 		const endDateValue = this.getFieldValue(fm, this.endDateFields);
 		const endDate = this.parseDate(endDateValue);
 
+		// Debug logging
+		console.log('[Timeline Debug]', {
+			file: file.path,
+			title,
+			startDateValue,
+			endDateValue,
+			startDate: startDate?.toISOString(),
+			endDate: endDate?.toISOString(),
+			fields: {
+				titleField: this.titleField,
+				startDateFields: this.startDateFields,
+				endDateFields: this.endDateFields
+			}
+		});
+
 		return {
 			title,
 			startDate,
