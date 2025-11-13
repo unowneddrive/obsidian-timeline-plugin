@@ -9,7 +9,7 @@ export class BarRenderer {
 		this.dateFormatter = new DateFormatter();
 	}
 
-	createBar(item: TimelineItem, bounds: TimelineBounds): HTMLElement {
+	createBar(item: TimelineItem, bounds: TimelineBounds, onFileClick?: (filePath: string) => void): HTMLElement {
 		const bar = document.createElement('div');
 		bar.className = `gantt-bar gantt-bar-${item.type}`;
 
@@ -24,6 +24,14 @@ export class BarRenderer {
 
 		bar.style.left = `${leftPercent}%`;
 		bar.style.width = `${Math.max(widthPercent, 1)}%`;
+
+		// Add click handler to open file
+		if (onFileClick) {
+			bar.style.cursor = 'pointer';
+			bar.addEventListener('click', () => {
+				onFileClick(item.file);
+			});
+		}
 
 		// Bar content
 		const barContent = bar.createEl('div', { cls: 'gantt-bar-content' });

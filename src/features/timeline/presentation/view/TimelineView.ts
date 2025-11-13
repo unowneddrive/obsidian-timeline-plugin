@@ -121,9 +121,16 @@ export class TimelineView extends ItemView {
 
 			// Render bar if dates exist
 			if (item.startDate && item.endDate) {
-				const bar = this.barRenderer.createBar(item, bounds);
+				const bar = this.barRenderer.createBar(item, bounds, (filePath) => this.openFile(filePath));
 				timelineRow.appendChild(bar);
 			}
+		}
+	}
+
+	private async openFile(filePath: string) {
+		const file = this.app.vault.getAbstractFileByPath(filePath);
+		if (file) {
+			await this.app.workspace.getLeaf(false).openFile(file as any);
 		}
 	}
 
