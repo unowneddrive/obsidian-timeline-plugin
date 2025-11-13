@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, App } from 'obsidian';
+import { ItemView, WorkspaceLeaf, App, TFile } from 'obsidian';
 import { GetTimelineItems } from '../../domain/usecases/GetTimelineItems';
 import { CalculateTimelineBounds } from '../../domain/usecases/CalculateTimelineBounds';
 import { ObsidianTimelineRepository } from '../../data/repositories/ObsidianTimelineRepository';
@@ -189,8 +189,8 @@ export class TimelineView extends ItemView {
 	private async toggleTask(filePath: string, content: string, completed: boolean) {
 		console.log('toggleTask ENTRY:', { filePath, content, completed });
 		const file = this.app.vault.getAbstractFileByPath(filePath);
-		console.log('File found:', !!file, 'Type:', file?.constructor.name);
-		if (!file || file.constructor.name !== 'TFile') {
+		console.log('File found:', !!file, 'instanceof TFile:', file instanceof TFile);
+		if (!file || !(file instanceof TFile)) {
 			console.log('Returning early - file not found or not TFile');
 			return;
 		}
