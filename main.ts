@@ -343,7 +343,14 @@ class TimelineView extends ItemView {
 
 		// Bar content
 		const barContent = bar.createEl('div', { cls: 'gantt-bar-content' });
-		barContent.textContent = item.title;
+
+		// Type icon
+		const typeIcon = barContent.createEl('span', { cls: 'gantt-bar-type-icon' });
+		typeIcon.textContent = item.type === 'project' ? '📁' : '✓';
+
+		// Title
+		const titleSpan = barContent.createEl('span', { cls: 'gantt-bar-title' });
+		titleSpan.textContent = item.title;
 
 		// Tooltip
 		const tooltip = bar.createEl('div', { cls: 'gantt-bar-tooltip' });
