@@ -284,27 +284,28 @@ class TimelineView extends ItemView {
 		const scaleContainer = container.createEl('div', { cls: 'gantt-time-scale' });
 
 		const currentDate = new Date(bounds.start);
-		const monthsShown = new Set<string>();
 
 		while (currentDate <= bounds.end) {
-			const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+			const dayLabel = scaleContainer.createEl('div', { cls: 'gantt-day-label' });
 
-			if (!monthsShown.has(monthKey)) {
-				monthsShown.add(monthKey);
-
-				const monthLabel = scaleContainer.createEl('div', { cls: 'gantt-month-label' });
-				monthLabel.textContent = currentDate.toLocaleDateString('en-US', {
-					month: 'short',
-					year: 'numeric'
-				});
+			const isFirstOfMonth = currentDate.getDate() === 1;
+			if (isFirstOfMonth) {
+				dayLabel.addClass('gantt-day-first-of-month');
 			}
 
-			currentDate.setDate(currentDate.getDate() + 7);
+			// Show day number
+			const day = currentDate.getDate();
+			const month = currentDate.toLocaleDateString('en-US', { month: 'short' });
+
+			// Show month for first day of month, otherwise just day
+			dayLabel.textContent = isFirstOfMonth ? `${month} ${day}` : `${day}`;
+
+			currentDate.setDate(currentDate.getDate() + 1);
 		}
 	}
 
 	renderGridCells(row: HTMLElement, bounds: { start: Date; end: Date; totalDays: number }) {
-		const cellCount = Math.ceil(bounds.totalDays / 7); // Weekly cells
+		const cellCount = Math.ceil(bounds.totalDays); // Daily cells
 
 		for (let i = 0; i < cellCount; i++) {
 			row.createEl('div', { cls: 'gantt-grid-cell' });
