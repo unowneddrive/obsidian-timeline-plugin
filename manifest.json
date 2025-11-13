@@ -1,0 +1,10 @@
+{
+	"id": "timeline-plugin",
+	"name": "Timeline Plugin",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Автоматически создает таймлайн проектов и задач из вашего vault",
+	"author": "Your Name",
+	"authorUrl": "https://github.com/unowneddrive/obsidian-timeline-plugin",
+	"isDesktopOnly": false
+}
