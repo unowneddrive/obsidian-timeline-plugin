@@ -31,7 +31,10 @@ export class TimelineView extends ItemView {
 		// Initialize renderers
 		this.timeScaleRenderer = new TimeScaleRenderer();
 		this.gridRenderer = new GridRenderer();
-		this.barRenderer = new BarRenderer((filePath, content, completed) => this.toggleTask(filePath, content, completed));
+		this.barRenderer = new BarRenderer((filePath, content, completed) => {
+			console.log('BarRenderer callback invoked!', { filePath, content, completed });
+			this.toggleTask(filePath, content, completed);
+		});
 		this.scrollController = new TimelineScrollController();
 	}
 
