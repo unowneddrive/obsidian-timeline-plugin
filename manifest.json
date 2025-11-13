@@ -3,7 +3,7 @@
 	"name": "Timeline Plugin",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Автоматически создает таймлайн проектов и задач из вашего vault",
+	"description": "Automatically creates timeline visualization of projects and tasks from your vault",
 	"author": "Your Name",
 	"authorUrl": "https://github.com/unowneddrive/obsidian-timeline-plugin",
 	"isDesktopOnly": false

@@ -211,7 +211,7 @@ class TimelineView extends ItemView {
 
 		if (items.length === 0) {
 			container.createEl('div', {
-				text: 'Нет проектов или задач для отображения. Добавьте в frontmatter файлов startDate и endDate, или используйте #task в тексте.',
+				text: 'No projects or tasks to display. Add startDate and endDate to file frontmatter, or use #task in your notes.',
 				cls: 'timeline-empty'
 			});
 			return;
@@ -252,7 +252,7 @@ class TimelineView extends ItemView {
 
 			// Type badge
 			contentEl.createEl('span', {
-				text: item.type === 'project' ? '📁 Проект' : '✓ Задача',
+				text: item.type === 'project' ? '📁 Project' : '✓ Task',
 				cls: 'timeline-type-badge'
 			});
 
@@ -262,14 +262,14 @@ class TimelineView extends ItemView {
 
 				if (item.startDate) {
 					datesEl.createEl('span', {
-						text: `Начало: ${this.formatDate(item.startDate)}`,
+						text: `Start: ${this.formatDate(item.startDate)}`,
 						cls: 'timeline-date-start'
 					});
 				}
 
 				if (item.endDate && item.endDate.getTime() !== item.startDate?.getTime()) {
 					datesEl.createEl('span', {
-						text: `Конец: ${this.formatDate(item.endDate)}`,
+						text: `End: ${this.formatDate(item.endDate)}`,
 						cls: 'timeline-date-end'
 					});
 				}
@@ -279,7 +279,7 @@ class TimelineView extends ItemView {
 					const days = Math.ceil((item.endDate.getTime() - item.startDate.getTime()) / (1000 * 60 * 60 * 24));
 					if (days > 0) {
 						datesEl.createEl('span', {
-							text: `(${days} дн.)`,
+							text: `(${days} day${days > 1 ? 's' : ''})`,
 							cls: 'timeline-duration'
 						});
 					}
@@ -295,7 +295,7 @@ class TimelineView extends ItemView {
 	}
 
 	formatDate(date: Date): string {
-		return date.toLocaleDateString('ru-RU', {
+		return date.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric'
@@ -322,11 +322,11 @@ class TimelineSettingTab extends PluginSettingTab {
 		containerEl.createEl('h2', { text: 'Timeline Plugin Settings' });
 
 		new Setting(containerEl)
-			.setName('Ориентация')
-			.setDesc('Вертикальная или горизонтальная ориентация таймлайна')
+			.setName('Orientation')
+			.setDesc('Vertical or horizontal timeline orientation')
 			.addDropdown(dropdown => dropdown
-				.addOption('vertical', 'Вертикальная')
-				.addOption('horizontal', 'Горизонтальная')
+				.addOption('vertical', 'Vertical')
+				.addOption('horizontal', 'Horizontal')
 				.setValue(this.plugin.settings.orientation)
 				.onChange(async (value) => {
 					this.plugin.settings.orientation = value as 'vertical' | 'horizontal';
@@ -334,8 +334,8 @@ class TimelineSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Показывать проекты')
-			.setDesc('Показывать проекты из frontmatter файлов')
+			.setName('Show projects')
+			.setDesc('Display projects from file frontmatter')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.showProjects)
 				.onChange(async (value) => {
@@ -344,8 +344,8 @@ class TimelineSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Показывать задачи')
-			.setDesc('Показывать задачи с тегом #task')
+			.setName('Show tasks')
+			.setDesc('Display tasks with #task tag')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.showTasks)
 				.onChange(async (value) => {
