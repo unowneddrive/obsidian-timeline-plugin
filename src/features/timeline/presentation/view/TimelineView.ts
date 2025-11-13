@@ -18,6 +18,7 @@ export class TimelineView extends ItemView {
 	private gridRenderer: GridRenderer;
 	private barRenderer: BarRenderer;
 	private scrollController: TimelineScrollController;
+	private isUpdatingTask: boolean = false;
 
 	constructor(leaf: WorkspaceLeaf, settings: PluginSettings) {
 		super(leaf);
@@ -58,7 +59,11 @@ export class TimelineView extends ItemView {
 
 		// Re-render on file changes
 		this.registerEvent(
-			this.app.vault.on('modify', () => this.renderTimeline())
+			this.app.vault.on('modify', () => {
+				if (!this.isUpdatingTask) {
+					this.renderTimeline();
+				}
+			})
 		);
 		this.registerEvent(
 			this.app.vault.on('create', () => this.renderTimeline())
@@ -228,7 +233,12 @@ export class TimelineView extends ItemView {
 			console.log('Line changed:', line !== newLine);
 
 			lines[lineIndex] = newLine;
+
+			// Set flag to prevent re-render on modify event
+			this.isUpdatingTask = true;
 			await this.app.vault.modify(file as any, lines.join('\n'));
+			this.isUpdatingTask = false;
+
 			console.log('File modified successfully');
 
 			// Update UI directly without full reload
@@ -259,6 +269,9 @@ export class TimelineView extends ItemView {
 			}
 		} catch (error) {
 			console.error('Failed to toggle task:', error);
+		} finally {
+			// Ensure flag is always reset
+			this.isUpdatingTask = false;
 		}
 	}
 
