@@ -57,7 +57,6 @@ export class BarRenderer {
 
 		// Bar content (will be positioned dynamically)
 		const barContent = wrapper.createEl('div', { cls: 'gantt-bar-content' });
-		barContent.style.background = `linear-gradient(135deg, ${color} 0%, ${this.lightenColor(color, 20)} 100%)`;
 		barContent.setAttribute('data-bar-left', leftPx.toString());
 		barContent.setAttribute('data-bar-width', widthPx.toString());
 
