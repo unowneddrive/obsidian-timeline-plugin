@@ -6,10 +6,11 @@ A plugin for automatically creating timeline visualization of projects and tasks
 
 - 📁 **Automatic Project Tracking** - Finds all files with start and end dates in frontmatter
 - ✅ **Task Display** - Finds all tasks with `#task` tag in your notes
-- 🔄 **Two Orientations** - Vertical or horizontal timeline layout
-- 🎨 **Beautiful Visualization** - Intuitive interface with dark theme support
+- 📊 **Modern Gantt-Chart Style** - Professional timeline with horizontal bars and time grid
+- 🎨 **Beautiful Visualization** - Clean, modern interface with dark theme support
 - ⚡ **Auto-updating** - Timeline updates automatically when files change
 - 🔗 **Quick Navigation** - Click on items to open the corresponding file
+- 💡 **Interactive Tooltips** - Hover over bars to see detailed information
 
 ## Installation
 
@@ -95,7 +96,6 @@ There are several ways:
 
 In the plugin settings you can:
 
-- **Orientation** - Choose vertical or horizontal timeline layout
 - **Show projects** - Toggle project display on/off
 - **Show tasks** - Toggle task display on/off
 

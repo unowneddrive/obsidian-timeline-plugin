@@ -1,131 +1,323 @@
 /* Timeline View Container */
 .timeline-view-container {
-	padding: 20px;
+	padding: 0;
 	height: 100%;
-	overflow-y: auto;
+	overflow: hidden;
+	background: var(--background-primary);
 }
 
 .timeline-empty {
-	padding: 40px 20px;
+	padding: 60px 20px;
 	text-align: center;
 	color: var(--text-muted);
-	font-style: italic;
+	font-size: 0.95em;
+	line-height: 1.6;
 }
 
-/* Timeline Header */
-.timeline-header {
+/* Gantt Container */
+.gantt-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+}
+
+/* Header */
+.gantt-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 30px;
-	padding-bottom: 10px;
-	border-bottom: 2px solid var(--background-modifier-border);
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	z-index: 10;
 }
 
-.timeline-header h4 {
+.gantt-header h4 {
 	margin: 0;
-	font-size: 1.5em;
+	font-size: 1.3em;
+	font-weight: 600;
 	color: var(--text-normal);
 }
 
-.timeline-header button {
+.gantt-refresh-btn {
 	background: var(--interactive-accent);
 	border: none;
-	border-radius: 4px;
-	padding: 5px 10px;
+	border-radius: 6px;
+	padding: 6px 12px;
 	cursor: pointer;
-	font-size: 1.2em;
-	transition: opacity 0.2s;
+	font-size: 1.1em;
+	transition: opacity 0.2s, transform 0.1s;
 }
 
-.timeline-header button:hover {
+.gantt-refresh-btn:hover {
 	opacity: 0.8;
+	transform: scale(1.05);
 }
 
-/* Vertical Timeline */
-.timeline-container.timeline-vertical {
-	position: relative;
-	padding-left: 40px;
+.gantt-refresh-btn:active {
+	transform: scale(0.95);
 }
 
-.timeline-container.timeline-vertical::before {
-	content: '';
-	position: absolute;
-	left: 15px;
-	top: 60px;
-	bottom: 0;
-	width: 3px;
-	background: var(--interactive-accent);
-	border-radius: 2px;
-}
-
-.timeline-container.timeline-vertical .timeline-item {
-	position: relative;
-	margin-bottom: 40px;
-	padding-left: 20px;
-}
-
-.timeline-container.timeline-vertical .timeline-dot {
-	position: absolute;
-	left: -28px;
-	top: 5px;
-	width: 16px;
-	height: 16px;
-	border-radius: 50%;
-	background: var(--background-primary);
-	border: 3px solid var(--interactive-accent);
-	z-index: 1;
-}
-
-/* Horizontal Timeline */
-.timeline-container.timeline-horizontal {
+/* Gantt Chart Layout */
+.gantt-chart {
 	display: flex;
-	overflow-x: auto;
-	padding: 20px 0;
-	gap: 30px;
-	position: relative;
-}
-
-.timeline-container.timeline-horizontal::before {
-	content: '';
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 30px;
-	height: 3px;
-	background: var(--interactive-accent);
-	border-radius: 2px;
-	z-index: 0;
-}
-
-.timeline-container.timeline-horizontal .timeline-item {
-	min-width: 250px;
-	padding-top: 50px;
-	position: relative;
-}
-
-.timeline-container.timeline-horizontal .timeline-dot {
-	position: absolute;
-	left: 50%;
-	top: 23px;
-	transform: translateX(-50%);
-	width: 16px;
-	height: 16px;
-	border-radius: 50%;
+	flex: 1;
+	overflow: hidden;
 	background: var(--background-primary);
-	border: 3px solid var(--interactive-accent);
-	z-index: 1;
 }
 
-/* Timeline Items */
-.timeline-item {
-	animation: fadeIn 0.3s ease-in;
+/* Sidebar */
+.gantt-sidebar {
+	width: 280px;
+	min-width: 280px;
+	border-right: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
-@keyframes fadeIn {
+.gantt-sidebar-row {
+	height: 52px;
+	padding: 12px 16px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	transition: background-color 0.2s;
+}
+
+.gantt-sidebar-row:hover {
+	background: var(--background-primary-alt);
+}
+
+.gantt-item-name {
+	flex: 1;
+	font-size: 0.92em;
+	font-weight: 500;
+	color: var(--text-normal);
+	text-decoration: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+}
+
+.gantt-item-name:hover {
+	color: var(--interactive-accent);
+}
+
+.gantt-badge {
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-size: 0.7em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	white-space: nowrap;
+}
+
+.gantt-badge-project {
+	background: rgba(88, 86, 214, 0.15);
+	color: rgb(88, 86, 214);
+}
+
+.gantt-badge-task {
+	background: rgba(16, 185, 129, 0.15);
+	color: rgb(16, 185, 129);
+}
+
+/* Timeline Area */
+.gantt-timeline {
+	flex: 1;
+	overflow-x: auto;
+	overflow-y: auto;
+	background: var(--background-primary);
+	position: relative;
+}
+
+/* Time Scale */
+.gantt-time-scale {
+	display: flex;
+	height: 48px;
+	min-width: 100%;
+	border-bottom: 2px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	position: sticky;
+	top: 0;
+	z-index: 5;
+}
+
+.gantt-month-label {
+	flex: 1;
+	padding: 12px 16px;
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--text-normal);
+	border-right: 1px solid var(--background-modifier-border);
+	text-align: left;
+	white-space: nowrap;
+}
+
+/* Grid Container */
+.gantt-grid-container {
+	position: relative;
+	min-width: 100%;
+}
+
+.gantt-row {
+	height: 52px;
+	position: relative;
+	display: flex;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+}
+
+.gantt-row:hover {
+	background: var(--background-primary-alt);
+}
+
+.gantt-grid-cell {
+	flex: 1;
+	border-right: 1px solid var(--background-modifier-border);
+	min-width: 80px;
+}
+
+/* Gantt Bars */
+.gantt-bar {
+	position: absolute;
+	height: 32px;
+	top: 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: transform 0.2s, box-shadow 0.2s;
+	overflow: hidden;
+	z-index: 2;
+}
+
+.gantt-bar:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	z-index: 3;
+}
+
+.gantt-bar-project {
+	background: linear-gradient(135deg, rgb(88, 86, 214) 0%, rgb(120, 119, 230) 100%);
+}
+
+.gantt-bar-task {
+	background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(52, 211, 153) 100%);
+}
+
+.gantt-bar-content {
+	padding: 0 12px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 0.85em;
+	font-weight: 500;
+	color: white;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Tooltip */
+.gantt-bar-tooltip {
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-8px);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 10px 14px;
+	font-size: 0.85em;
+	line-height: 1.5;
+	color: var(--text-normal);
+	white-space: nowrap;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s;
+	z-index: 100;
+}
+
+.gantt-bar:hover .gantt-bar-tooltip {
+	opacity: 1;
+}
+
+.gantt-bar-tooltip strong {
+	display: block;
+	margin-bottom: 4px;
+	color: var(--text-normal);
+	font-weight: 600;
+}
+
+.tooltip-duration {
+	color: var(--interactive-accent);
+	font-weight: 600;
+}
+
+/* Scrollbar Styling */
+.gantt-sidebar::-webkit-scrollbar,
+.gantt-timeline::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+.gantt-sidebar::-webkit-scrollbar-track,
+.gantt-timeline::-webkit-scrollbar-track {
+	background: var(--background-primary);
+}
+
+.gantt-sidebar::-webkit-scrollbar-thumb,
+.gantt-timeline::-webkit-scrollbar-thumb {
+	background: var(--background-modifier-border);
+	border-radius: 5px;
+}
+
+.gantt-sidebar::-webkit-scrollbar-thumb:hover,
+.gantt-timeline::-webkit-scrollbar-thumb:hover {
+	background: var(--text-muted);
+}
+
+/* Dark Theme Adjustments */
+.theme-dark .gantt-bar {
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .gantt-bar:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.theme-dark .gantt-bar-tooltip {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.gantt-sidebar {
+		width: 200px;
+		min-width: 200px;
+	}
+
+	.gantt-item-name {
+		font-size: 0.85em;
+	}
+
+	.gantt-badge {
+		font-size: 0.65em;
+		padding: 2px 6px;
+	}
+}
+
+/* Animation */
+@keyframes slideIn {
 	from {
 		opacity: 0;
-		transform: translateY(-10px);
+		transform: translateY(10px);
 	}
 	to {
 		opacity: 1;
@@ -133,142 +325,10 @@
 	}
 }
 
-.timeline-content {
-	background: var(--background-secondary);
-	padding: 15px;
-	border-radius: 8px;
-	border-left: 4px solid var(--interactive-accent);
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-	transition: transform 0.2s, box-shadow 0.2s;
+.gantt-row {
+	animation: slideIn 0.3s ease-out;
 }
 
-.timeline-content:hover {
-	transform: translateX(5px);
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.timeline-horizontal .timeline-content:hover {
-	transform: translateY(-5px);
-}
-
-/* Project items */
-.timeline-item-project .timeline-dot {
-	border-color: var(--color-blue);
-}
-
-.timeline-item-project .timeline-content {
-	border-left-color: var(--color-blue);
-}
-
-/* Task items */
-.timeline-item-task .timeline-dot {
-	border-color: var(--color-green);
-}
-
-.timeline-item-task .timeline-content {
-	border-left-color: var(--color-green);
-}
-
-/* Timeline Content Elements */
-.timeline-title {
-	font-size: 1.1em;
-	font-weight: 600;
-	margin-bottom: 8px;
-	color: var(--text-normal);
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
-
-.timeline-title a {
-	color: var(--text-normal);
-	text-decoration: none;
-	flex: 1;
-}
-
-.timeline-title a:hover {
-	color: var(--interactive-accent);
-	text-decoration: underline;
-}
-
-.timeline-type-badge {
-	display: inline-block;
-	padding: 2px 8px;
-	border-radius: 4px;
-	font-size: 0.85em;
-	background: var(--background-primary-alt);
-	color: var(--text-muted);
-	margin-bottom: 8px;
-}
-
-.timeline-dates {
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
-	margin: 10px 0;
-	font-size: 0.9em;
-	color: var(--text-muted);
-}
-
-.timeline-date-start,
-.timeline-date-end {
-	padding: 4px 8px;
-	background: var(--background-primary-alt);
-	border-radius: 4px;
-	display: inline-block;
-	width: fit-content;
-}
-
-.timeline-date-start {
-	border-left: 3px solid var(--color-green);
-}
-
-.timeline-date-end {
-	border-left: 3px solid var(--color-red);
-}
-
-.timeline-duration {
-	font-weight: 600;
-	color: var(--interactive-accent);
-	margin-left: 5px;
-}
-
-.timeline-file-path {
-	font-size: 0.8em;
-	color: var(--text-faint);
-	margin-top: 8px;
-	font-family: var(--font-monospace);
-	opacity: 0.7;
-}
-
-/* Scrollbar styling */
-.timeline-view-container::-webkit-scrollbar,
-.timeline-container.timeline-horizontal::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
-}
-
-.timeline-view-container::-webkit-scrollbar-track,
-.timeline-container.timeline-horizontal::-webkit-scrollbar-track {
-	background: var(--background-primary);
-}
-
-.timeline-view-container::-webkit-scrollbar-thumb,
-.timeline-container.timeline-horizontal::-webkit-scrollbar-thumb {
-	background: var(--background-modifier-border);
-	border-radius: 4px;
-}
-
-.timeline-view-container::-webkit-scrollbar-thumb:hover,
-.timeline-container.timeline-horizontal::-webkit-scrollbar-thumb:hover {
-	background: var(--text-muted);
-}
-
-/* Dark mode adjustments */
-.theme-dark .timeline-content {
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-.theme-dark .timeline-content:hover {
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+.gantt-bar {
+	animation: slideIn 0.4s ease-out;
 }

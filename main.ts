@@ -1,14 +1,12 @@
 import { App, Plugin, PluginSettingTab, Setting, ItemView, WorkspaceLeaf, TFile, CachedMetadata } from 'obsidian';
 
 interface TimelinePluginSettings {
-	orientation: 'vertical' | 'horizontal';
 	showProjects: boolean;
 	showTasks: boolean;
 	dateFormat: string;
 }
 
 const DEFAULT_SETTINGS: TimelinePluginSettings = {
-	orientation: 'vertical',
 	showProjects: true,
 	showTasks: true,
 	dateFormat: 'YYYY-MM-DD'
@@ -217,32 +215,42 @@ class TimelineView extends ItemView {
 			return;
 		}
 
-		const timelineContainer = container.createEl('div', {
-			cls: `timeline-container timeline-${this.plugin.settings.orientation}`
-		});
+		// Calculate timeline bounds
+		const bounds = this.calculateTimelineBounds(items);
+		if (!bounds) return;
 
-		// Add header with refresh button
-		const header = timelineContainer.createEl('div', { cls: 'timeline-header' });
+		// Create main timeline container
+		const timelineContainer = container.createEl('div', { cls: 'gantt-container' });
+
+		// Header with controls
+		const header = timelineContainer.createEl('div', { cls: 'gantt-header' });
 		header.createEl('h4', { text: 'Timeline' });
-		const refreshBtn = header.createEl('button', { text: '🔄' });
+		const refreshBtn = header.createEl('button', { text: '🔄', cls: 'gantt-refresh-btn' });
 		refreshBtn.addEventListener('click', () => this.renderTimeline());
 
-		// Render timeline items
+		// Create gantt chart
+		const ganttChart = timelineContainer.createEl('div', { cls: 'gantt-chart' });
+
+		// Left sidebar with item names
+		const sidebar = ganttChart.createEl('div', { cls: 'gantt-sidebar' });
+
+		// Right timeline area with grid
+		const timelineArea = ganttChart.createEl('div', { cls: 'gantt-timeline' });
+
+		// Render time scale
+		this.renderTimeScale(timelineArea, bounds);
+
+		// Render grid and items
+		const gridContainer = timelineArea.createEl('div', { cls: 'gantt-grid-container' });
+
 		for (const item of items) {
-			const itemEl = timelineContainer.createEl('div', {
-				cls: `timeline-item timeline-item-${item.type}`
-			});
-
-			const dotEl = itemEl.createEl('div', { cls: 'timeline-dot' });
-			const contentEl = itemEl.createEl('div', { cls: 'timeline-content' });
-
-			// Title
-			const titleEl = contentEl.createEl('div', { cls: 'timeline-title' });
-			const link = titleEl.createEl('a', {
+			// Sidebar row
+			const sidebarRow = sidebar.createEl('div', { cls: 'gantt-sidebar-row' });
+			const itemLink = sidebarRow.createEl('a', {
 				text: item.title,
-				cls: 'internal-link'
+				cls: 'gantt-item-name'
 			});
-			link.addEventListener('click', async (e) => {
+			itemLink.addEventListener('click', async (e) => {
 				e.preventDefault();
 				const file = this.app.vault.getAbstractFileByPath(item.file);
 				if (file instanceof TFile) {
@@ -250,48 +258,110 @@ class TimelineView extends ItemView {
 				}
 			});
 
-			// Type badge
-			contentEl.createEl('span', {
-				text: item.type === 'project' ? '📁 Project' : '✓ Task',
-				cls: 'timeline-type-badge'
+			const badge = sidebarRow.createEl('span', {
+				cls: `gantt-badge gantt-badge-${item.type}`
 			});
+			badge.textContent = item.type === 'project' ? 'Project' : 'Task';
 
-			// Dates
-			if (item.startDate || item.endDate) {
-				const datesEl = contentEl.createEl('div', { cls: 'timeline-dates' });
+			// Timeline row
+			const timelineRow = gridContainer.createEl('div', { cls: 'gantt-row' });
 
-				if (item.startDate) {
-					datesEl.createEl('span', {
-						text: `Start: ${this.formatDate(item.startDate)}`,
-						cls: 'timeline-date-start'
-					});
-				}
+			// Render grid cells
+			this.renderGridCells(timelineRow, bounds);
 
-				if (item.endDate && item.endDate.getTime() !== item.startDate?.getTime()) {
-					datesEl.createEl('span', {
-						text: `End: ${this.formatDate(item.endDate)}`,
-						cls: 'timeline-date-end'
-					});
-				}
+			// Render bar if dates exist
+			if (item.startDate && item.endDate) {
+				const bar = this.createBar(item, bounds);
+				timelineRow.appendChild(bar);
+			}
+		}
+	}
 
-				// Calculate and show duration
-				if (item.startDate && item.endDate) {
-					const days = Math.ceil((item.endDate.getTime() - item.startDate.getTime()) / (1000 * 60 * 60 * 24));
-					if (days > 0) {
-						datesEl.createEl('span', {
-							text: `(${days} day${days > 1 ? 's' : ''})`,
-							cls: 'timeline-duration'
-						});
-					}
-				}
+	calculateTimelineBounds(items: TimelineItem[]): { start: Date; end: Date; totalDays: number } | null {
+		let minDate: Date | null = null;
+		let maxDate: Date | null = null;
+
+		for (const item of items) {
+			if (item.startDate) {
+				if (!minDate || item.startDate < minDate) minDate = item.startDate;
+			}
+			if (item.endDate) {
+				if (!maxDate || item.endDate > maxDate) maxDate = item.endDate;
+			}
+		}
+
+		if (!minDate || !maxDate) return null;
+
+		// Add padding
+		const paddingDays = 7;
+		minDate = new Date(minDate.getTime() - paddingDays * 24 * 60 * 60 * 1000);
+		maxDate = new Date(maxDate.getTime() + paddingDays * 24 * 60 * 60 * 1000);
+
+		const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
+
+		return { start: minDate, end: maxDate, totalDays };
+	}
+
+	renderTimeScale(container: HTMLElement, bounds: { start: Date; end: Date; totalDays: number }) {
+		const scaleContainer = container.createEl('div', { cls: 'gantt-time-scale' });
+
+		const currentDate = new Date(bounds.start);
+		const monthsShown = new Set<string>();
+
+		while (currentDate <= bounds.end) {
+			const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+
+			if (!monthsShown.has(monthKey)) {
+				monthsShown.add(monthKey);
+
+				const monthLabel = scaleContainer.createEl('div', { cls: 'gantt-month-label' });
+				monthLabel.textContent = currentDate.toLocaleDateString('en-US', {
+					month: 'short',
+					year: 'numeric'
+				});
 			}
 
-			// File path
-			contentEl.createEl('div', {
-				text: item.file,
-				cls: 'timeline-file-path'
-			});
+			currentDate.setDate(currentDate.getDate() + 7);
 		}
+	}
+
+	renderGridCells(row: HTMLElement, bounds: { start: Date; end: Date; totalDays: number }) {
+		const cellCount = Math.ceil(bounds.totalDays / 7); // Weekly cells
+
+		for (let i = 0; i < cellCount; i++) {
+			row.createEl('div', { cls: 'gantt-grid-cell' });
+		}
+	}
+
+	createBar(item: TimelineItem, bounds: { start: Date; end: Date; totalDays: number }): HTMLElement {
+		const bar = document.createElement('div');
+		bar.className = `gantt-bar gantt-bar-${item.type}`;
+
+		if (!item.startDate || !item.endDate) return bar;
+
+		// Calculate position and width
+		const startOffset = (item.startDate.getTime() - bounds.start.getTime()) / (1000 * 60 * 60 * 24);
+		const duration = (item.endDate.getTime() - item.startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+		const leftPercent = (startOffset / bounds.totalDays) * 100;
+		const widthPercent = (duration / bounds.totalDays) * 100;
+
+		bar.style.left = `${leftPercent}%`;
+		bar.style.width = `${Math.max(widthPercent, 1)}%`;
+
+		// Bar content
+		const barContent = bar.createEl('div', { cls: 'gantt-bar-content' });
+		barContent.textContent = item.title;
+
+		// Tooltip
+		const tooltip = bar.createEl('div', { cls: 'gantt-bar-tooltip' });
+		tooltip.innerHTML = `
+			<strong>${item.title}</strong><br>
+			${this.formatDate(item.startDate)} - ${this.formatDate(item.endDate)}<br>
+			<span class="tooltip-duration">${Math.ceil(duration)} day${duration > 1 ? 's' : ''}</span>
+		`;
+
+		return bar;
 	}
 
 	formatDate(date: Date): string {
@@ -320,18 +390,6 @@ class TimelineSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		containerEl.createEl('h2', { text: 'Timeline Plugin Settings' });
-
-		new Setting(containerEl)
-			.setName('Orientation')
-			.setDesc('Vertical or horizontal timeline orientation')
-			.addDropdown(dropdown => dropdown
-				.addOption('vertical', 'Vertical')
-				.addOption('horizontal', 'Horizontal')
-				.setValue(this.plugin.settings.orientation)
-				.onChange(async (value) => {
-					this.plugin.settings.orientation = value as 'vertical' | 'horizontal';
-					await this.plugin.saveSettings();
-				}));
 
 		new Setting(containerEl)
 			.setName('Show projects')
