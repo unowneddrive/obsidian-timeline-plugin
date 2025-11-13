@@ -262,6 +262,10 @@ export class TimelineView extends ItemView {
 
 			console.log('Task content element found:', !!taskContent);
 			if (taskContent) {
+				// Update the data-task-content attribute to match the new file content
+				taskContent.setAttribute('data-task-content', newLine.trim());
+				console.log('Updated data-task-content to:', newLine.trim());
+
 				const titleSpan = taskContent.querySelector('.gantt-bar-title') as HTMLElement;
 				console.log('Title span found:', !!titleSpan);
 				if (titleSpan) {
