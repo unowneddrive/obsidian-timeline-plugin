@@ -85,7 +85,12 @@ export class BarRenderer {
 				if (this.onTaskToggle && item.content) {
 					const newCompleted = checkbox.checked;
 					console.log('Calling onTaskToggle with:', { file: item.file, content: item.content, completed: newCompleted });
-					this.onTaskToggle(item.file, item.content, newCompleted);
+					try {
+						this.onTaskToggle(item.file, item.content, newCompleted);
+						console.log('onTaskToggle called successfully');
+					} catch (error) {
+						console.error('Error calling onTaskToggle:', error);
+					}
 				} else {
 					console.log('NOT calling onTaskToggle - missing callback or content');
 				}
