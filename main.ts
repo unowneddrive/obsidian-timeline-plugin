@@ -4,14 +4,12 @@ interface TimelinePluginSettings {
 	showProjects: boolean;
 	showTasks: boolean;
 	dateFormat: string;
-	sidebarWidth: number;
 }
 
 const DEFAULT_SETTINGS: TimelinePluginSettings = {
 	showProjects: true,
 	showTasks: true,
-	dateFormat: 'YYYY-MM-DD',
-	sidebarWidth: 280
+	dateFormat: 'YYYY-MM-DD'
 }
 
 interface TimelineItem {
@@ -233,15 +231,7 @@ class TimelineView extends ItemView {
 		// Create gantt chart
 		const ganttChart = timelineContainer.createEl('div', { cls: 'gantt-chart' });
 
-		// Left sidebar with item names
-		const sidebar = ganttChart.createEl('div', { cls: 'gantt-sidebar' });
-		sidebar.style.width = `${this.plugin.settings.sidebarWidth}px`;
-
-		// Resizer
-		const resizer = ganttChart.createEl('div', { cls: 'gantt-resizer' });
-		this.setupResizer(resizer, sidebar);
-
-		// Right timeline area with grid
+		// Timeline area with grid
 		const timelineArea = ganttChart.createEl('div', { cls: 'gantt-timeline' });
 
 		// Render time scale
@@ -251,25 +241,6 @@ class TimelineView extends ItemView {
 		const gridContainer = timelineArea.createEl('div', { cls: 'gantt-grid-container' });
 
 		for (const item of items) {
-			// Sidebar row
-			const sidebarRow = sidebar.createEl('div', { cls: 'gantt-sidebar-row' });
-			const itemLink = sidebarRow.createEl('a', {
-				text: item.title,
-				cls: 'gantt-item-name'
-			});
-			itemLink.addEventListener('click', async (e) => {
-				e.preventDefault();
-				const file = this.app.vault.getAbstractFileByPath(item.file);
-				if (file instanceof TFile) {
-					await this.app.workspace.getLeaf().openFile(file);
-				}
-			});
-
-			const badge = sidebarRow.createEl('span', {
-				cls: `gantt-badge gantt-badge-${item.type}`
-			});
-			badge.textContent = item.type === 'project' ? 'Project' : 'Task';
-
 			// Timeline row
 			const timelineRow = gridContainer.createEl('div', { cls: 'gantt-row' });
 
@@ -369,52 +340,6 @@ class TimelineView extends ItemView {
 		`;
 
 		return bar;
-	}
-
-	setupResizer(resizer: HTMLElement, sidebar: HTMLElement) {
-		let isResizing = false;
-		let startX = 0;
-		let startWidth = 0;
-
-		const onMouseDown = (e: MouseEvent) => {
-			isResizing = true;
-			startX = e.clientX;
-			startWidth = sidebar.offsetWidth;
-
-			document.body.style.cursor = 'col-resize';
-			document.body.style.userSelect = 'none';
-
-			e.preventDefault();
-		};
-
-		const onMouseMove = (e: MouseEvent) => {
-			if (!isResizing) return;
-
-			const delta = e.clientX - startX;
-			const newWidth = Math.max(200, Math.min(600, startWidth + delta));
-
-			sidebar.style.width = `${newWidth}px`;
-		};
-
-		const onMouseUp = async () => {
-			if (!isResizing) return;
-
-			isResizing = false;
-			document.body.style.cursor = '';
-			document.body.style.userSelect = '';
-
-			// Save width to settings
-			this.plugin.settings.sidebarWidth = sidebar.offsetWidth;
-			await this.plugin.saveSettings();
-		};
-
-		resizer.addEventListener('mousedown', onMouseDown);
-		document.addEventListener('mousemove', onMouseMove);
-		document.addEventListener('mouseup', onMouseUp);
-
-		// Cleanup listeners on view close
-		this.registerDomEvent(document, 'mousemove', onMouseMove);
-		this.registerDomEvent(document, 'mouseup', onMouseUp);
 	}
 
 	formatDate(date: Date): string {
