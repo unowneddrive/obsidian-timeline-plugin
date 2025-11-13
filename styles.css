@@ -175,32 +175,18 @@
 	border-right: 1px solid var(--background-modifier-border);
 }
 
-/* Gantt Bars */
-.gantt-bar {
-	position: absolute;
-	min-height: 32px;
-	max-height: 60px;
-	top: 5px;
-	border-radius: 6px;
+/* Gantt Bar Wrapper */
+.gantt-bar-wrapper {
+	z-index: 2;
 	cursor: pointer;
 	transition: transform 0.2s, box-shadow 0.2s;
-	overflow-x: visible;
-	overflow-y: hidden;
-	z-index: 2;
+	overflow: visible;
 }
 
-.gantt-bar:hover {
+.gantt-bar-wrapper:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	z-index: 3;
-}
-
-.gantt-bar-project {
-	background: linear-gradient(135deg, rgb(88, 86, 214) 0%, rgb(120, 119, 230) 100%);
-}
-
-.gantt-bar-task {
-	background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(52, 211, 153) 100%);
 }
 
 .gantt-bar-content {
@@ -212,12 +198,11 @@
 	font-size: 0.85em;
 	font-weight: 500;
 	color: white;
-	position: sticky;
-	left: 0;
-	background: inherit;
+	position: relative;
 	max-width: 400px;
 	z-index: 1;
 	border-radius: 6px;
+	transition: transform 0.1s ease-out;
 }
 
 .gantt-bar-type-icon {
@@ -342,6 +327,6 @@
 	animation: slideIn 0.3s ease-out;
 }
 
-.gantt-bar {
+.gantt-bar-wrapper {
 	animation: slideIn 0.4s ease-out;
 }

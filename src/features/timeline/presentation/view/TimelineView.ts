@@ -136,6 +136,48 @@ export class TimelineView extends ItemView {
 		setTimeout(() => {
 			this.scrollController.scrollToToday(timelineArea, bounds, false);
 		}, 100);
+
+		// Add scroll handler to make bar labels sticky
+		this.setupStickyBarLabels(timelineArea);
+	}
+
+	private setupStickyBarLabels(timelineArea: HTMLElement): void {
+		let rafId: number | null = null;
+
+		const updateLabels = () => {
+			const scrollLeft = timelineArea.scrollLeft;
+			const viewportWidth = timelineArea.clientWidth;
+
+			const labels = timelineArea.querySelectorAll('.gantt-bar-content');
+			labels.forEach((label: HTMLElement) => {
+				const barLeft = parseFloat(label.getAttribute('data-bar-left') || '0');
+				const barWidth = parseFloat(label.getAttribute('data-bar-width') || '0');
+
+				// Calculate how far the bar extends past the left edge of viewport
+				const barStartInViewport = barLeft - scrollLeft;
+				const barEndInViewport = barStartInViewport + barWidth;
+
+				// Only make sticky if bar extends past left edge
+				if (barStartInViewport < 0 && barEndInViewport > 0) {
+					// Label should stick at the left edge of viewport
+					const offset = Math.min(-barStartInViewport, barWidth - 400); // max 400px offset
+					label.style.transform = `translateX(${Math.max(0, offset)}px)`;
+				} else {
+					label.style.transform = 'translateX(0)';
+				}
+			});
+
+			rafId = null;
+		};
+
+		timelineArea.addEventListener('scroll', () => {
+			if (rafId === null) {
+				rafId = requestAnimationFrame(updateLabels);
+			}
+		});
+
+		// Initial update
+		updateLabels();
 	}
 
 	private async openFile(filePath: string) {

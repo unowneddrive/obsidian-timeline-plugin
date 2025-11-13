@@ -15,10 +15,10 @@ export class BarRenderer {
 	}
 
 	createBar(item: TimelineItem, bounds: TimelineBounds, colors: BarColors, onFileClick?: (filePath: string) => void): HTMLElement {
-		const bar = document.createElement('div');
-		bar.className = `gantt-bar gantt-bar-${item.type}`;
+		const wrapper = document.createElement('div');
+		wrapper.className = 'gantt-bar-wrapper';
 
-		if (!item.startDate || !item.endDate) return bar;
+		if (!item.startDate || !item.endDate) return wrapper;
 
 		// Calculate position and width
 		const startOffset = (item.startDate.getTime() - bounds.start.getTime()) / (1000 * 60 * 60 * 24);
@@ -34,24 +34,32 @@ export class BarRenderer {
 		const leftPx = startOffset * dayWidthPx;
 		const widthPx = duration * dayWidthPx;
 
-		bar.style.left = `${leftPx}px`;
-		bar.style.width = `${widthPx}px`;
-		bar.style.minWidth = '150px'; // Minimum width to show text properly
+		wrapper.style.position = 'absolute';
+		wrapper.style.left = `${leftPx}px`;
+		wrapper.style.width = `${widthPx}px`;
+		wrapper.style.minWidth = '150px';
+		wrapper.style.top = '5px';
+		wrapper.style.minHeight = '32px';
+		wrapper.style.maxHeight = '60px';
+		wrapper.style.borderRadius = '6px';
 
 		// Apply custom color
 		const color = item.type === 'project' ? colors.projectColor : colors.taskColor;
-		bar.style.background = `linear-gradient(135deg, ${color} 0%, ${this.lightenColor(color, 20)} 100%)`;
+		wrapper.style.background = `linear-gradient(135deg, ${color} 0%, ${this.lightenColor(color, 20)} 100%)`;
 
-		// Add click handler to open file
+		// Add click handler to wrapper
 		if (onFileClick) {
-			bar.style.cursor = 'pointer';
-			bar.addEventListener('click', () => {
+			wrapper.style.cursor = 'pointer';
+			wrapper.addEventListener('click', () => {
 				onFileClick(item.file);
 			});
 		}
 
-		// Bar content
-		const barContent = bar.createEl('div', { cls: 'gantt-bar-content' });
+		// Bar content (will be positioned dynamically)
+		const barContent = wrapper.createEl('div', { cls: 'gantt-bar-content' });
+		barContent.style.background = `linear-gradient(135deg, ${color} 0%, ${this.lightenColor(color, 20)} 100%)`;
+		barContent.setAttribute('data-bar-left', leftPx.toString());
+		barContent.setAttribute('data-bar-width', widthPx.toString());
 
 		// Type icon
 		const typeIcon = barContent.createEl('span', { cls: 'gantt-bar-type-icon' });
@@ -62,14 +70,14 @@ export class BarRenderer {
 		titleSpan.textContent = item.title;
 
 		// Tooltip
-		const tooltip = bar.createEl('div', { cls: 'gantt-bar-tooltip' });
+		const tooltip = wrapper.createEl('div', { cls: 'gantt-bar-tooltip' });
 		tooltip.innerHTML = `
 			<strong>${item.title}</strong><br>
 			${this.dateFormatter.formatDate(item.startDate)} - ${this.dateFormatter.formatDate(item.endDate)}<br>
 			<span class="tooltip-duration">${Math.ceil(duration)} day${duration > 1 ? 's' : ''}</span>
 		`;
 
-		return bar;
+		return wrapper;
 	}
 
 	private lightenColor(color: string, percent: number): string {
