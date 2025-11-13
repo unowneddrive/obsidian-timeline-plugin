@@ -139,6 +139,15 @@ obsidian-timeline-plugin/
 - `npm run build` - Production build
 - `npm run version` - Update version
 
+## Publishing to Community Store
+
+Want to publish this plugin to the Obsidian Community Plugins store? See [PUBLISHING.md](PUBLISHING.md) for a complete guide.
+
+**Quick steps:**
+1. Build the plugin: `npm run build`
+2. Create a GitHub release with `main.js`, `manifest.json`, and `styles.css`
+3. Submit a PR to [obsidian-releases](https://github.com/obsidianmd/obsidian-releases)
+
 ## Possible Improvements
 
 - [ ] Filters by type (projects/tasks)
