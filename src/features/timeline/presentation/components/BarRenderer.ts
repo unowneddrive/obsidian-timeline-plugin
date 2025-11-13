@@ -29,28 +29,14 @@ export class BarRenderer {
 			duration = 1;
 		}
 
-		const leftPercent = (startOffset / bounds.totalDays) * 100;
-		const widthPercent = (duration / bounds.totalDays) * 100;
+		// Each day = 40px in the grid
+		const dayWidthPx = 40;
+		const leftPx = startOffset * dayWidthPx;
+		const widthPx = duration * dayWidthPx;
 
-		// Debug logging
-		console.log('BarRenderer positioning:', {
-			title: item.title,
-			startDate: item.startDate.toISOString().split('T')[0],
-			endDate: item.endDate.toISOString().split('T')[0],
-			boundsStart: bounds.start.toISOString().split('T')[0],
-			boundsEnd: bounds.end.toISOString().split('T')[0],
-			totalDays: bounds.totalDays,
-			startOffset: startOffset.toFixed(2),
-			duration: duration.toFixed(2),
-			leftPercent: leftPercent.toFixed(2) + '%',
-			widthPercent: widthPercent.toFixed(2) + '%'
-		});
-
-		bar.style.left = `${leftPercent}%`;
-		// Minimum width of 40px (one day in grid) for readability
-		const minWidthPx = 40;
-		bar.style.minWidth = `${minWidthPx}px`;
-		bar.style.width = `${widthPercent}%`;
+		bar.style.left = `${leftPx}px`;
+		bar.style.width = `${widthPx}px`;
+		bar.style.minWidth = `${dayWidthPx}px`; // Minimum one day
 
 		// Apply custom color
 		const color = item.type === 'project' ? colors.projectColor : colors.taskColor;
