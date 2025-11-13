@@ -208,9 +208,18 @@ export class TimelineView extends ItemView {
 			await this.app.vault.modify(file as any, lines.join('\n'));
 
 			// Update UI directly without full reload
-			const taskContent = this.containerEl.querySelector(
-				`.gantt-bar-content[data-task-file="${filePath}"][data-task-content="${content}"]`
-			);
+			// Find the task element by iterating instead of using complex selector
+			// (to avoid issues with special characters in content)
+			const taskContents = this.containerEl.querySelectorAll('.gantt-bar-content');
+			let taskContent: Element | null = null;
+
+			for (const el of taskContents) {
+				if (el.getAttribute('data-task-file') === filePath &&
+					el.getAttribute('data-task-content') === content) {
+					taskContent = el;
+					break;
+				}
+			}
 
 			if (taskContent) {
 				const titleSpan = taskContent.querySelector('.gantt-bar-title') as HTMLElement;
