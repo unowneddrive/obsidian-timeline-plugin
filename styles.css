@@ -184,7 +184,8 @@
 	border-radius: 6px;
 	cursor: pointer;
 	transition: transform 0.2s, box-shadow 0.2s;
-	overflow: hidden;
+	overflow-x: visible;
+	overflow-y: hidden;
 	z-index: 2;
 }
 
@@ -211,6 +212,12 @@
 	font-size: 0.85em;
 	font-weight: 500;
 	color: white;
+	position: sticky;
+	left: 0;
+	background: inherit;
+	max-width: 400px;
+	z-index: 1;
+	border-radius: 6px;
 }
 
 .gantt-bar-type-icon {
