@@ -2,6 +2,11 @@ import { TimelineItem } from '../../domain/entities/TimelineItem';
 import { TimelineBounds } from '../../domain/entities/TimelineBounds';
 import { DateFormatter } from '../utils/DateFormatter';
 
+export interface BarColors {
+	projectColor: string;
+	taskColor: string;
+}
+
 export class BarRenderer {
 	private dateFormatter: DateFormatter;
 
@@ -9,7 +14,7 @@ export class BarRenderer {
 		this.dateFormatter = new DateFormatter();
 	}
 
-	createBar(item: TimelineItem, bounds: TimelineBounds, onFileClick?: (filePath: string) => void): HTMLElement {
+	createBar(item: TimelineItem, bounds: TimelineBounds, colors: BarColors, onFileClick?: (filePath: string) => void): HTMLElement {
 		const bar = document.createElement('div');
 		bar.className = `gantt-bar gantt-bar-${item.type}`;
 
@@ -24,6 +29,10 @@ export class BarRenderer {
 
 		bar.style.left = `${leftPercent}%`;
 		bar.style.width = `${Math.max(widthPercent, 1)}%`;
+
+		// Apply custom color
+		const color = item.type === 'project' ? colors.projectColor : colors.taskColor;
+		bar.style.background = `linear-gradient(135deg, ${color} 0%, ${this.lightenColor(color, 20)} 100%)`;
 
 		// Add click handler to open file
 		if (onFileClick) {
@@ -53,5 +62,21 @@ export class BarRenderer {
 		`;
 
 		return bar;
+	}
+
+	private lightenColor(color: string, percent: number): string {
+		// Convert hex to RGB
+		const hex = color.replace('#', '');
+		const r = parseInt(hex.substring(0, 2), 16);
+		const g = parseInt(hex.substring(2, 4), 16);
+		const b = parseInt(hex.substring(4, 6), 16);
+
+		// Lighten each component
+		const newR = Math.min(255, Math.floor(r + (255 - r) * (percent / 100)));
+		const newG = Math.min(255, Math.floor(g + (255 - g) * (percent / 100)));
+		const newB = Math.min(255, Math.floor(b + (255 - b) * (percent / 100)));
+
+		// Convert back to hex
+		return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
 	}
 }

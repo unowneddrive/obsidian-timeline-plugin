@@ -4,7 +4,7 @@ import { CalculateTimelineBounds } from '../../domain/usecases/CalculateTimeline
 import { ObsidianTimelineRepository } from '../../data/repositories/ObsidianTimelineRepository';
 import { TimeScaleRenderer } from '../components/TimeScaleRenderer';
 import { GridRenderer } from '../components/GridRenderer';
-import { BarRenderer } from '../components/BarRenderer';
+import { BarRenderer, BarColors } from '../components/BarRenderer';
 import { TimelineScrollController } from '../components/TimelineScrollController';
 import { PluginSettings } from '../../../../core/domain/entities/PluginSettings';
 
@@ -112,6 +112,12 @@ export class TimelineView extends ItemView {
 		// Render grid and items
 		const gridContainer = timelineArea.createEl('div', { cls: 'gantt-grid-container' });
 
+		// Prepare colors from settings
+		const colors: BarColors = {
+			projectColor: this.settings.projectColor,
+			taskColor: this.settings.taskColor
+		};
+
 		for (const item of items) {
 			// Timeline row
 			const timelineRow = gridContainer.createEl('div', { cls: 'gantt-row' });
@@ -121,7 +127,7 @@ export class TimelineView extends ItemView {
 
 			// Render bar if dates exist
 			if (item.startDate && item.endDate) {
-				const bar = this.barRenderer.createBar(item, bounds, (filePath) => this.openFile(filePath));
+				const bar = this.barRenderer.createBar(item, bounds, colors, (filePath) => this.openFile(filePath));
 				timelineRow.appendChild(bar);
 			}
 		}

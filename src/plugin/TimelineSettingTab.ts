@@ -34,5 +34,27 @@ export class TimelineSettingTab extends PluginSettingTab {
 					this.plugin.settings.showTasks = value;
 					await this.plugin.saveSettings();
 				}));
+
+		containerEl.createEl('h3', { text: 'Colors' });
+
+		new Setting(containerEl)
+			.setName('Project color')
+			.setDesc('Color for project bars')
+			.addColorPicker(color => color
+				.setValue(this.plugin.settings.projectColor)
+				.onChange(async (value) => {
+					this.plugin.settings.projectColor = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Task color')
+			.setDesc('Color for task bars')
+			.addColorPicker(color => color
+				.setValue(this.plugin.settings.taskColor)
+				.onChange(async (value) => {
+					this.plugin.settings.taskColor = value;
+					await this.plugin.saveSettings();
+				}));
 	}
 }
