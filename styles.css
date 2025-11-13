@@ -69,12 +69,35 @@
 
 /* Sidebar */
 .gantt-sidebar {
-	width: 280px;
-	min-width: 280px;
-	border-right: 1px solid var(--background-modifier-border);
+	min-width: 200px;
+	max-width: 600px;
+	flex-shrink: 0;
 	background: var(--background-primary);
 	overflow-y: auto;
 	overflow-x: hidden;
+}
+
+/* Resizer */
+.gantt-resizer {
+	width: 4px;
+	background: var(--background-modifier-border);
+	cursor: col-resize;
+	flex-shrink: 0;
+	transition: background-color 0.2s;
+	position: relative;
+}
+
+.gantt-resizer:hover {
+	background: var(--interactive-accent);
+}
+
+.gantt-resizer::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -4px;
+	right: -4px;
 }
 
 .gantt-sidebar-row {

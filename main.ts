@@ -4,12 +4,14 @@ interface TimelinePluginSettings {
 	showProjects: boolean;
 	showTasks: boolean;
 	dateFormat: string;
+	sidebarWidth: number;
 }
 
 const DEFAULT_SETTINGS: TimelinePluginSettings = {
 	showProjects: true,
 	showTasks: true,
-	dateFormat: 'YYYY-MM-DD'
+	dateFormat: 'YYYY-MM-DD',
+	sidebarWidth: 280
 }
 
 interface TimelineItem {
@@ -233,6 +235,11 @@ class TimelineView extends ItemView {
 
 		// Left sidebar with item names
 		const sidebar = ganttChart.createEl('div', { cls: 'gantt-sidebar' });
+		sidebar.style.width = `${this.plugin.settings.sidebarWidth}px`;
+
+		// Resizer
+		const resizer = ganttChart.createEl('div', { cls: 'gantt-resizer' });
+		this.setupResizer(resizer, sidebar);
 
 		// Right timeline area with grid
 		const timelineArea = ganttChart.createEl('div', { cls: 'gantt-timeline' });
@@ -362,6 +369,52 @@ class TimelineView extends ItemView {
 		`;
 
 		return bar;
+	}
+
+	setupResizer(resizer: HTMLElement, sidebar: HTMLElement) {
+		let isResizing = false;
+		let startX = 0;
+		let startWidth = 0;
+
+		const onMouseDown = (e: MouseEvent) => {
+			isResizing = true;
+			startX = e.clientX;
+			startWidth = sidebar.offsetWidth;
+
+			document.body.style.cursor = 'col-resize';
+			document.body.style.userSelect = 'none';
+
+			e.preventDefault();
+		};
+
+		const onMouseMove = (e: MouseEvent) => {
+			if (!isResizing) return;
+
+			const delta = e.clientX - startX;
+			const newWidth = Math.max(200, Math.min(600, startWidth + delta));
+
+			sidebar.style.width = `${newWidth}px`;
+		};
+
+		const onMouseUp = async () => {
+			if (!isResizing) return;
+
+			isResizing = false;
+			document.body.style.cursor = '';
+			document.body.style.userSelect = '';
+
+			// Save width to settings
+			this.plugin.settings.sidebarWidth = sidebar.offsetWidth;
+			await this.plugin.saveSettings();
+		};
+
+		resizer.addEventListener('mousedown', onMouseDown);
+		document.addEventListener('mousemove', onMouseMove);
+		document.addEventListener('mouseup', onMouseUp);
+
+		// Cleanup listeners on view close
+		this.registerDomEvent(document, 'mousemove', onMouseMove);
+		this.registerDomEvent(document, 'mouseup', onMouseUp);
 	}
 
 	formatDate(date: Date): string {
