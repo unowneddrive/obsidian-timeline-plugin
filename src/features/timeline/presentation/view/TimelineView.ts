@@ -198,10 +198,10 @@ export class TimelineView extends ItemView {
 
 			if (completed) {
 				// Mark as completed
-				newLine = line.replace(/^([-*]\s*)\[.\]/, '$1[x]');
+				newLine = line.replace(/^(\s*[-*]\s*)\[.\]/, '$1[x]');
 			} else {
 				// Mark as incomplete
-				newLine = line.replace(/^([-*]\s*)\[.\]/, '$1[ ]');
+				newLine = line.replace(/^(\s*[-*]\s*)\[.\]/, '$1[ ]');
 			}
 
 			lines[lineIndex] = newLine;
