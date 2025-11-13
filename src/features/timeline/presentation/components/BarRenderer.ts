@@ -75,11 +75,19 @@ export class BarRenderer {
 				type: 'checkbox'
 			});
 			checkbox.checked = item.completed || false;
+			console.log('Checkbox created for task:', item.title, 'checked:', checkbox.checked);
 			checkbox.addEventListener('click', (e) => {
+				console.log('Checkbox clicked!');
 				e.stopPropagation(); // Prevent opening file
+				console.log('Has onTaskToggle:', !!this.onTaskToggle);
+				console.log('Has item.content:', !!item.content);
+				console.log('New checked state:', checkbox.checked);
 				if (this.onTaskToggle && item.content) {
 					const newCompleted = checkbox.checked;
+					console.log('Calling onTaskToggle with:', { file: item.file, content: item.content, completed: newCompleted });
 					this.onTaskToggle(item.file, item.content, newCompleted);
+				} else {
+					console.log('NOT calling onTaskToggle - missing callback or content');
 				}
 			});
 		}
