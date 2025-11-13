@@ -36,7 +36,7 @@ export class BarRenderer {
 
 		bar.style.left = `${leftPx}px`;
 		bar.style.width = `${widthPx}px`;
-		bar.style.minWidth = `${dayWidthPx}px`; // Minimum one day
+		bar.style.minWidth = '150px'; // Minimum width to show text properly
 
 		// Apply custom color
 		const color = item.type === 'project' ? colors.projectColor : colors.taskColor;

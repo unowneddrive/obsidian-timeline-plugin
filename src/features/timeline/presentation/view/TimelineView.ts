@@ -132,9 +132,9 @@ export class TimelineView extends ItemView {
 			}
 		}
 
-		// Auto-scroll to today after rendering
+		// Auto-scroll to today immediately without animation
 		setTimeout(() => {
-			this.scrollController.scrollToToday(timelineArea, bounds);
+			this.scrollController.scrollToToday(timelineArea, bounds, false);
 		}, 100);
 	}
 

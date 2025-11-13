@@ -1,7 +1,7 @@
 import { TimelineBounds } from '../../domain/entities/TimelineBounds';
 
 export class TimelineScrollController {
-	scrollToToday(timelineArea: HTMLElement, bounds: TimelineBounds): void {
+	scrollToToday(timelineArea: HTMLElement, bounds: TimelineBounds, smooth: boolean = true): void {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
@@ -11,10 +11,10 @@ export class TimelineScrollController {
 		// Each day is 40px wide
 		const scrollPosition = daysFromStart * 40;
 
-		// Scroll to position with smooth animation
+		// Scroll to position
 		timelineArea.scrollTo({
 			left: scrollPosition - (timelineArea.clientWidth / 2) + 20, // Center today
-			behavior: 'smooth'
+			behavior: smooth ? 'smooth' : 'auto'
 		});
 	}
 }
