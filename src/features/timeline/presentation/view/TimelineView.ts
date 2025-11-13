@@ -187,8 +187,13 @@ export class TimelineView extends ItemView {
 	}
 
 	private async toggleTask(filePath: string, content: string, completed: boolean) {
+		console.log('toggleTask ENTRY:', { filePath, content, completed });
 		const file = this.app.vault.getAbstractFileByPath(filePath);
-		if (!file || file.constructor.name !== 'TFile') return;
+		console.log('File found:', !!file, 'Type:', file?.constructor.name);
+		if (!file || file.constructor.name !== 'TFile') {
+			console.log('Returning early - file not found or not TFile');
+			return;
+		}
 
 		try {
 			const fileContent = await this.app.vault.read(file as any);
