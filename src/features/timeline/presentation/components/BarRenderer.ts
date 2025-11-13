@@ -84,9 +84,11 @@ export class BarRenderer {
 				console.log('New checked state:', checkbox.checked);
 				if (this.onTaskToggle && item.content) {
 					const newCompleted = checkbox.checked;
-					console.log('Calling onTaskToggle with:', { file: item.file, content: item.content, completed: newCompleted });
+					// Will use currentContent defined below
+				const currentContent = barContent.getAttribute('data-task-content') || item.content;
+				console.log('Calling onTaskToggle with:', { file: item.file, content: currentContent, completed: newCompleted });
 					try {
-						this.onTaskToggle(item.file, item.content, newCompleted);
+						this.onTaskToggle(item.file, currentContent, newCompleted);
 						console.log('onTaskToggle called successfully');
 					} catch (error) {
 						console.error('Error calling onTaskToggle:', error);
