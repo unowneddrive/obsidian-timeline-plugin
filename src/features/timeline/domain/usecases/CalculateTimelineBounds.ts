@@ -30,17 +30,6 @@ export class CalculateTimelineBounds {
 
 		const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-		// Debug logging
-		console.log('[Timeline Bounds Debug]', {
-			today: today.toISOString(),
-			minDate: minDate?.toISOString(),
-			maxDate: maxDate?.toISOString(),
-			startDate: startDate.toISOString(),
-			endDate: endDate.toISOString(),
-			totalDays,
-			itemCount: items.length
-		});
-
 		return { start: startDate, end: endDate, totalDays };
 	}
 }

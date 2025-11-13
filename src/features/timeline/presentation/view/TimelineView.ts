@@ -131,6 +131,11 @@ export class TimelineView extends ItemView {
 				timelineRow.appendChild(bar);
 			}
 		}
+
+		// Auto-scroll to today after rendering
+		setTimeout(() => {
+			this.scrollController.scrollToToday(timelineArea, bounds);
+		}, 100);
 	}
 
 	private async openFile(filePath: string) {
