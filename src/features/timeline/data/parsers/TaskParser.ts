@@ -35,19 +35,29 @@ export class TaskParser {
 				const startDate = dateMatch && dateMatch[0] ? this.parseDate(dateMatch[0]) : null;
 				const endDate = dateMatch && dateMatch[1] ? this.parseDate(dateMatch[1]) : null;
 
+				// Check if task is completed (checkbox with x)
+				const checkboxMatch = line.match(/^[-*]\s*\[(.)\]/);
+				const completed = checkboxMatch ? (checkboxMatch[1] === 'x' || checkboxMatch[1] === 'X') : undefined;
+
 				// Extract task title (remove #task and dates)
 				let taskTitle = line.replace(/#task/g, '').replace(/\d{4}-\d{2}-\d{2}/g, '').trim();
 				taskTitle = taskTitle.replace(/^[-*]\s*\[.\]\s*/, '').trim(); // Remove checkbox if present
 
 				if (taskTitle) {
-					tasks.push({
+					const task: any = {
 						title: taskTitle,
 						startDate: startDate,
 						endDate: endDate || startDate,
 						type: 'task',
 						file: file.path,
 						content: line.trim()
-					});
+					};
+
+					if (completed !== undefined) {
+						task.completed = completed;
+					}
+
+					tasks.push(task);
 				}
 			}
 		}

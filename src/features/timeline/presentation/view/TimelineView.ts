@@ -31,7 +31,7 @@ export class TimelineView extends ItemView {
 		// Initialize renderers
 		this.timeScaleRenderer = new TimeScaleRenderer();
 		this.gridRenderer = new GridRenderer();
-		this.barRenderer = new BarRenderer();
+		this.barRenderer = new BarRenderer((filePath, content, completed) => this.toggleTask(filePath, content, completed));
 		this.scrollController = new TimelineScrollController();
 	}
 
@@ -178,6 +178,40 @@ export class TimelineView extends ItemView {
 
 		// Initial update
 		updateLabels();
+	}
+
+	private async toggleTask(filePath: string, content: string, completed: boolean) {
+		const file = this.app.vault.getAbstractFileByPath(filePath);
+		if (!file || file.constructor.name !== 'TFile') return;
+
+		try {
+			const fileContent = await this.app.vault.read(file as any);
+			const lines = fileContent.split('\n');
+
+			// Find the line with the task
+			const lineIndex = lines.findIndex(line => line.trim() === content);
+			if (lineIndex === -1) return;
+
+			// Toggle checkbox in the line
+			const line = lines[lineIndex];
+			let newLine: string;
+
+			if (completed) {
+				// Mark as completed
+				newLine = line.replace(/^([-*]\s*)\[.\]/, '$1[x]');
+			} else {
+				// Mark as incomplete
+				newLine = line.replace(/^([-*]\s*)\[.\]/, '$1[ ]');
+			}
+
+			lines[lineIndex] = newLine;
+			await this.app.vault.modify(file as any, lines.join('\n'));
+
+			// Refresh the timeline
+			await this.renderTimeline();
+		} catch (error) {
+			console.error('Failed to toggle task:', error);
+		}
 	}
 
 	private async openFile(filePath: string) {

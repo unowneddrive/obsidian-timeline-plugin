@@ -204,6 +204,15 @@
 	transition: transform 0.1s ease-out;
 }
 
+.gantt-task-checkbox {
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	margin: 0;
+	accent-color: white;
+}
+
 .gantt-bar-type-icon {
 	font-size: 1.1em;
 	flex-shrink: 0;

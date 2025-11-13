@@ -5,4 +5,5 @@ export interface TimelineItem {
 	type: 'project' | 'task';
 	file: string;
 	content?: string;
+	completed?: boolean;
 }

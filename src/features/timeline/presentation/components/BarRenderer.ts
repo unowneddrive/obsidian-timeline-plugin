@@ -9,9 +9,11 @@ export interface BarColors {
 
 export class BarRenderer {
 	private dateFormatter: DateFormatter;
+	private onTaskToggle?: (filePath: string, content: string, completed: boolean) => void;
 
-	constructor() {
+	constructor(onTaskToggle?: (filePath: string, content: string, completed: boolean) => void) {
 		this.dateFormatter = new DateFormatter();
+		this.onTaskToggle = onTaskToggle;
 	}
 
 	createBar(item: TimelineItem, bounds: TimelineBounds, colors: BarColors, onFileClick?: (filePath: string) => void): HTMLElement {
@@ -60,6 +62,21 @@ export class BarRenderer {
 		barContent.setAttribute('data-bar-left', leftPx.toString());
 		barContent.setAttribute('data-bar-width', widthPx.toString());
 
+		// Add checkbox for tasks
+		if (item.type === 'task') {
+			const checkbox = barContent.createEl('input', {
+				cls: 'gantt-task-checkbox',
+				type: 'checkbox'
+			});
+			checkbox.checked = item.completed || false;
+			checkbox.addEventListener('click', (e) => {
+				e.stopPropagation(); // Prevent opening file
+				if (this.onTaskToggle && item.content) {
+					this.onTaskToggle(item.file, item.content, !checkbox.checked);
+				}
+			});
+		}
+
 		// Type icon
 		const typeIcon = barContent.createEl('span', { cls: 'gantt-bar-type-icon' });
 		typeIcon.textContent = item.type === 'project' ? '📁' : '✓';
@@ -67,6 +84,10 @@ export class BarRenderer {
 		// Title
 		const titleSpan = barContent.createEl('span', { cls: 'gantt-bar-title' });
 		titleSpan.textContent = item.title;
+		if (item.type === 'task' && item.completed) {
+			titleSpan.style.textDecoration = 'line-through';
+			titleSpan.style.opacity = '0.6';
+		}
 
 		// Tooltip
 		const tooltip = wrapper.createEl('div', { cls: 'gantt-bar-tooltip' });
