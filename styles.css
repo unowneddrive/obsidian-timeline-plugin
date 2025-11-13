@@ -99,8 +99,10 @@
 }
 
 .gantt-day-label {
+	width: 40px;
 	min-width: 40px;
-	padding: 12px 8px;
+	max-width: 40px;
+	padding: 12px 4px;
 	font-size: 0.75em;
 	font-weight: 500;
 	color: var(--text-muted);
@@ -108,13 +110,15 @@
 	text-align: center;
 	white-space: nowrap;
 	flex-shrink: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .gantt-day-first-of-month {
 	font-weight: 700;
 	color: var(--text-normal);
 	background: var(--background-primary-alt);
-	min-width: 60px;
+	font-size: 0.7em;
 }
 
 /* Grid Container */
