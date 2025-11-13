@@ -210,7 +210,7 @@ export class TimelineView extends ItemView {
 			// Update UI directly without full reload
 			// Find the task element by iterating instead of using complex selector
 			// (to avoid issues with special characters in content)
-			const taskContents = this.containerEl.querySelectorAll('.gantt-bar-content');
+			const taskContents = Array.from(this.containerEl.querySelectorAll<Element>('.gantt-bar-content'));
 			let taskContent: Element | null = null;
 
 			for (const el of taskContents) {
