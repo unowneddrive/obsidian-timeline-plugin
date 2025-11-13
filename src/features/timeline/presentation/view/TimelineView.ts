@@ -24,7 +24,7 @@ export class TimelineView extends ItemView {
 		this.settings = settings;
 
 		// Initialize repository and use cases
-		const repository = new ObsidianTimelineRepository(this.app);
+		const repository = new ObsidianTimelineRepository(this.app, settings);
 		this.getTimelineItems = new GetTimelineItems(repository);
 		this.calculateTimelineBounds = new CalculateTimelineBounds();
 

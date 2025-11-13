@@ -3,13 +3,18 @@ import { ITimelineRepository } from '../../domain/repositories/ITimelineReposito
 import { TimelineItem } from '../../domain/entities/TimelineItem';
 import { ProjectParser } from '../parsers/ProjectParser';
 import { TaskParser } from '../parsers/TaskParser';
+import { PluginSettings } from '../../../../core/domain/entities/PluginSettings';
 
 export class ObsidianTimelineRepository implements ITimelineRepository {
 	private projectParser: ProjectParser;
 	private taskParser: TaskParser;
 
-	constructor(private app: App) {
-		this.projectParser = new ProjectParser();
+	constructor(private app: App, settings: PluginSettings) {
+		this.projectParser = new ProjectParser(
+			settings.projectTitleField,
+			settings.projectStartDateField,
+			settings.projectEndDateField
+		);
 		this.taskParser = new TaskParser();
 	}
 

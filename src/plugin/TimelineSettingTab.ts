@@ -56,5 +56,40 @@ export class TimelineSettingTab extends PluginSettingTab {
 					this.plugin.settings.taskColor = value;
 					await this.plugin.saveSettings();
 				}));
+
+		containerEl.createEl('h3', { text: 'Project Fields' });
+
+		new Setting(containerEl)
+			.setName('Title field')
+			.setDesc('Frontmatter field name for project title (default: title)')
+			.addText(text => text
+				.setPlaceholder('title')
+				.setValue(this.plugin.settings.projectTitleField)
+				.onChange(async (value) => {
+					this.plugin.settings.projectTitleField = value || 'title';
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Start date field')
+			.setDesc('Frontmatter field name(s) for start date, comma-separated (e.g., start_date,startDate)')
+			.addText(text => text
+				.setPlaceholder('start_date')
+				.setValue(this.plugin.settings.projectStartDateField)
+				.onChange(async (value) => {
+					this.plugin.settings.projectStartDateField = value || 'start_date';
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('End date field')
+			.setDesc('Frontmatter field name(s) for end date, comma-separated (e.g., finish_date,endDate)')
+			.addText(text => text
+				.setPlaceholder('finish_date')
+				.setValue(this.plugin.settings.projectEndDateField)
+				.onChange(async (value) => {
+					this.plugin.settings.projectEndDateField = value || 'finish_date';
+					await this.plugin.saveSettings();
+				}));
 	}
 }
