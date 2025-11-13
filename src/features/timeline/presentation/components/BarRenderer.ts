@@ -22,13 +22,21 @@ export class BarRenderer {
 
 		// Calculate position and width
 		const startOffset = (item.startDate.getTime() - bounds.start.getTime()) / (1000 * 60 * 60 * 24);
-		const duration = (item.endDate.getTime() - item.startDate.getTime()) / (1000 * 60 * 60 * 24);
+		let duration = (item.endDate.getTime() - item.startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+		// Ensure minimum duration of 1 day for display purposes
+		if (duration < 1) {
+			duration = 1;
+		}
 
 		const leftPercent = (startOffset / bounds.totalDays) * 100;
 		const widthPercent = (duration / bounds.totalDays) * 100;
 
 		bar.style.left = `${leftPercent}%`;
-		bar.style.width = `${Math.max(widthPercent, 1)}%`;
+		// Minimum width of 40px (one day in grid) for readability
+		const minWidthPx = 40;
+		bar.style.minWidth = `${minWidthPx}px`;
+		bar.style.width = `${widthPercent}%`;
 
 		// Apply custom color
 		const color = item.type === 'project' ? colors.projectColor : colors.taskColor;
