@@ -207,8 +207,23 @@ export class TimelineView extends ItemView {
 			lines[lineIndex] = newLine;
 			await this.app.vault.modify(file as any, lines.join('\n'));
 
-			// Refresh the timeline
-			await this.renderTimeline();
+			// Update UI directly without full reload
+			const taskContent = this.containerEl.querySelector(
+				`.gantt-bar-content[data-task-file="${filePath}"][data-task-content="${content}"]`
+			);
+
+			if (taskContent) {
+				const titleSpan = taskContent.querySelector('.gantt-bar-title') as HTMLElement;
+				if (titleSpan) {
+					if (completed) {
+						titleSpan.style.textDecoration = 'line-through';
+						titleSpan.style.opacity = '0.6';
+					} else {
+						titleSpan.style.textDecoration = 'none';
+						titleSpan.style.opacity = '1';
+					}
+				}
+			}
 		} catch (error) {
 			console.error('Failed to toggle task:', error);
 		}

@@ -62,6 +62,12 @@ export class BarRenderer {
 		barContent.setAttribute('data-bar-left', leftPx.toString());
 		barContent.setAttribute('data-bar-width', widthPx.toString());
 
+		// Store task info for updates
+		if (item.type === 'task' && item.content) {
+			barContent.setAttribute('data-task-file', item.file);
+			barContent.setAttribute('data-task-content', item.content);
+		}
+
 		// Add checkbox for tasks
 		if (item.type === 'task') {
 			const checkbox = barContent.createEl('input', {
@@ -72,14 +78,17 @@ export class BarRenderer {
 			checkbox.addEventListener('click', (e) => {
 				e.stopPropagation(); // Prevent opening file
 				if (this.onTaskToggle && item.content) {
-					this.onTaskToggle(item.file, item.content, !checkbox.checked);
+					const newCompleted = checkbox.checked;
+					this.onTaskToggle(item.file, item.content, newCompleted);
 				}
 			});
 		}
 
-		// Type icon
-		const typeIcon = barContent.createEl('span', { cls: 'gantt-bar-type-icon' });
-		typeIcon.textContent = item.type === 'project' ? '📁' : '✓';
+		// Type icon (only for projects)
+		if (item.type === 'project') {
+			const typeIcon = barContent.createEl('span', { cls: 'gantt-bar-type-icon' });
+			typeIcon.textContent = '📁';
+		}
 
 		// Title
 		const titleSpan = barContent.createEl('span', { cls: 'gantt-bar-title' });
