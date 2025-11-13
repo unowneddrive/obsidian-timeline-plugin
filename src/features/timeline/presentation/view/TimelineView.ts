@@ -33,11 +33,7 @@ export class TimelineView extends ItemView {
 		this.timeScaleRenderer = new TimeScaleRenderer();
 		this.gridRenderer = new GridRenderer();
 		this.barRenderer = new BarRenderer((filePath, content, completed) => {
-			console.log('BarRenderer callback invoked!', { filePath, content, completed });
-			console.log('this.toggleTask exists:', typeof this.toggleTask);
-			console.log('About to call this.toggleTask...');
 			this.toggleTask(filePath, content, completed);
-			console.log('Called this.toggleTask');
 		});
 		this.scrollController = new TimelineScrollController();
 	}
@@ -192,11 +188,8 @@ export class TimelineView extends ItemView {
 	}
 
 	private async toggleTask(filePath: string, content: string, completed: boolean) {
-		console.log('toggleTask ENTRY:', { filePath, content, completed });
 		const file = this.app.vault.getAbstractFileByPath(filePath);
-		console.log('File found:', !!file, 'instanceof TFile:', file instanceof TFile);
 		if (!file || !(file instanceof TFile)) {
-			console.log('Returning early - file not found or not TFile');
 			return;
 		}
 
@@ -204,21 +197,12 @@ export class TimelineView extends ItemView {
 			const fileContent = await this.app.vault.read(file as any);
 			const lines = fileContent.split('\n');
 
-			console.log('toggleTask called:', { filePath, content, completed });
-			console.log('Looking for line matching:', content);
-
 			// Find the line with the task
 			const lineIndex = lines.findIndex(line => line.trim() === content);
-			console.log('Found line at index:', lineIndex);
-
-			if (lineIndex === -1) {
-				console.log('Line not found! Available lines:', lines);
-				return;
-			}
+			if (lineIndex === -1) return;
 
 			// Toggle checkbox in the line
 			const line = lines[lineIndex];
-			console.log('Original line:', line);
 			let newLine: string;
 
 			if (completed) {
@@ -229,9 +213,6 @@ export class TimelineView extends ItemView {
 				newLine = line.replace(/^(\s*[-*]\s*)\[.\]/, '$1[ ]');
 			}
 
-			console.log('New line after replace:', newLine);
-			console.log('Line changed:', line !== newLine);
-
 			lines[lineIndex] = newLine;
 
 			// Set flag to prevent re-render on modify event
@@ -239,48 +220,35 @@ export class TimelineView extends ItemView {
 			await this.app.vault.modify(file as any, lines.join('\n'));
 			this.isUpdatingTask = false;
 
-			console.log('File modified successfully');
-
 			// Update UI directly without full reload
 			// Find the task element by iterating instead of using complex selector
 			// (to avoid issues with special characters in content)
-			console.log('Starting UI update...');
 			const taskContents = Array.from(this.containerEl.querySelectorAll<Element>('.gantt-bar-content'));
-			console.log('Found task elements:', taskContents.length);
 			let taskContent: Element | null = null;
 
 			for (const el of taskContents) {
 				const elFile = el.getAttribute('data-task-file');
 				const elContent = el.getAttribute('data-task-content');
-				console.log('Checking element:', { elFile, elContent });
 				if (elFile === filePath && elContent === content) {
 					taskContent = el;
-					console.log('Found matching task element!');
 					break;
 				}
 			}
 
-			console.log('Task content element found:', !!taskContent);
 			if (taskContent) {
 				// Update the data-task-content attribute to match the new file content
 				taskContent.setAttribute('data-task-content', newLine.trim());
-				console.log('Updated data-task-content to:', newLine.trim());
 
 				const titleSpan = taskContent.querySelector('.gantt-bar-title') as HTMLElement;
-				console.log('Title span found:', !!titleSpan);
 				if (titleSpan) {
 					if (completed) {
 						titleSpan.style.textDecoration = 'line-through';
 						titleSpan.style.opacity = '0.6';
-						console.log('Applied completed styles');
 					} else {
 						titleSpan.style.textDecoration = 'none';
 						titleSpan.style.opacity = '1';
-						console.log('Applied incomplete styles');
 					}
 				}
-			} else {
-				console.log('Task content element NOT found, looking for:', { filePath, content });
 			}
 		} catch (error) {
 			console.error('Failed to toggle task:', error);
