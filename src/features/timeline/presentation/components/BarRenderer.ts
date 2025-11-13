@@ -79,7 +79,9 @@ export class BarRenderer {
 				e.stopPropagation(); // Prevent opening file
 				if (this.onTaskToggle && item.content) {
 					const newCompleted = checkbox.checked;
-					this.onTaskToggle(item.file, item.content, newCompleted);
+					// Read current content from DOM attribute to get updated checkbox state
+					const currentContent = barContent.getAttribute('data-task-content') || item.content;
+					this.onTaskToggle(item.file, currentContent, newCompleted);
 				}
 			});
 		}

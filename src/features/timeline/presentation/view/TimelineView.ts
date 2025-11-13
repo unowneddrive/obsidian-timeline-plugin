@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, App } from 'obsidian';
+import { ItemView, WorkspaceLeaf, App, TFile } from 'obsidian';
 import { GetTimelineItems } from '../../domain/usecases/GetTimelineItems';
 import { CalculateTimelineBounds } from '../../domain/usecases/CalculateTimelineBounds';
 import { ObsidianTimelineRepository } from '../../data/repositories/ObsidianTimelineRepository';
@@ -18,6 +18,7 @@ export class TimelineView extends ItemView {
 	private gridRenderer: GridRenderer;
 	private barRenderer: BarRenderer;
 	private scrollController: TimelineScrollController;
+	private isUpdatingTask: boolean = false;
 
 	constructor(leaf: WorkspaceLeaf, settings: PluginSettings) {
 		super(leaf);
@@ -31,7 +32,9 @@ export class TimelineView extends ItemView {
 		// Initialize renderers
 		this.timeScaleRenderer = new TimeScaleRenderer();
 		this.gridRenderer = new GridRenderer();
-		this.barRenderer = new BarRenderer((filePath, content, completed) => this.toggleTask(filePath, content, completed));
+		this.barRenderer = new BarRenderer((filePath, content, completed) => {
+			this.toggleTask(filePath, content, completed);
+		});
 		this.scrollController = new TimelineScrollController();
 	}
 
@@ -52,7 +55,11 @@ export class TimelineView extends ItemView {
 
 		// Re-render on file changes
 		this.registerEvent(
-			this.app.vault.on('modify', () => this.renderTimeline())
+			this.app.vault.on('modify', () => {
+				if (!this.isUpdatingTask) {
+					this.renderTimeline();
+				}
+			})
 		);
 		this.registerEvent(
 			this.app.vault.on('create', () => this.renderTimeline())
@@ -182,7 +189,9 @@ export class TimelineView extends ItemView {
 
 	private async toggleTask(filePath: string, content: string, completed: boolean) {
 		const file = this.app.vault.getAbstractFileByPath(filePath);
-		if (!file || file.constructor.name !== 'TFile') return;
+		if (!file || !(file instanceof TFile)) {
+			return;
+		}
 
 		try {
 			const fileContent = await this.app.vault.read(file as any);
@@ -198,21 +207,38 @@ export class TimelineView extends ItemView {
 
 			if (completed) {
 				// Mark as completed
-				newLine = line.replace(/^([-*]\s*)\[.\]/, '$1[x]');
+				newLine = line.replace(/^(\s*[-*]\s*)\[.\]/, '$1[x]');
 			} else {
 				// Mark as incomplete
-				newLine = line.replace(/^([-*]\s*)\[.\]/, '$1[ ]');
+				newLine = line.replace(/^(\s*[-*]\s*)\[.\]/, '$1[ ]');
 			}
 
 			lines[lineIndex] = newLine;
+
+			// Set flag to prevent re-render on modify event
+			this.isUpdatingTask = true;
 			await this.app.vault.modify(file as any, lines.join('\n'));
+			this.isUpdatingTask = false;
 
 			// Update UI directly without full reload
-			const taskContent = this.containerEl.querySelector(
-				`.gantt-bar-content[data-task-file="${filePath}"][data-task-content="${content}"]`
-			);
+			// Find the task element by iterating instead of using complex selector
+			// (to avoid issues with special characters in content)
+			const taskContents = Array.from(this.containerEl.querySelectorAll<Element>('.gantt-bar-content'));
+			let taskContent: Element | null = null;
+
+			for (const el of taskContents) {
+				const elFile = el.getAttribute('data-task-file');
+				const elContent = el.getAttribute('data-task-content');
+				if (elFile === filePath && elContent === content) {
+					taskContent = el;
+					break;
+				}
+			}
 
 			if (taskContent) {
+				// Update the data-task-content attribute to match the new file content
+				taskContent.setAttribute('data-task-content', newLine.trim());
+
 				const titleSpan = taskContent.querySelector('.gantt-bar-title') as HTMLElement;
 				if (titleSpan) {
 					if (completed) {
@@ -226,6 +252,9 @@ export class TimelineView extends ItemView {
 			}
 		} catch (error) {
 			console.error('Failed to toggle task:', error);
+		} finally {
+			// Ensure flag is always reset
+			this.isUpdatingTask = false;
 		}
 	}
 
