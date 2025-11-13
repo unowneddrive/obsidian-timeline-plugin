@@ -89,7 +89,7 @@
 /* Time Scale */
 .gantt-time-scale {
 	display: flex;
-	height: 48px;
+	flex-direction: column;
 	min-width: 100%;
 	border-bottom: 2px solid var(--background-modifier-border);
 	background: var(--background-secondary);
@@ -98,11 +98,47 @@
 	z-index: 5;
 }
 
+.gantt-year-row,
+.gantt-month-row,
+.gantt-day-row {
+	display: flex;
+	min-width: 100%;
+}
+
+.gantt-year-row {
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.gantt-month-row {
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.gantt-year-label,
+.gantt-month-label {
+	padding: 8px 4px;
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--text-normal);
+	border-right: 1px solid var(--background-modifier-border);
+	text-align: center;
+	white-space: nowrap;
+	flex-shrink: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	background: var(--background-secondary);
+}
+
+.gantt-year-label {
+	font-size: 0.9em;
+	font-weight: 700;
+	background: var(--background-primary-alt);
+}
+
 .gantt-day-label {
 	width: 40px;
 	min-width: 40px;
 	max-width: 40px;
-	padding: 12px 4px;
+	padding: 8px 4px;
 	font-size: 0.75em;
 	font-weight: 500;
 	color: var(--text-muted);
@@ -112,13 +148,6 @@
 	flex-shrink: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
-
-.gantt-day-first-of-month {
-	font-weight: 700;
-	color: var(--text-normal);
-	background: var(--background-primary-alt);
-	font-size: 0.7em;
 }
 
 /* Grid Container */
