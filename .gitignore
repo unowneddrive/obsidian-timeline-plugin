@@ -5,6 +5,7 @@ package-lock.json
 # build
 main.js
 *.js.map
+main-old.ts
 
 # obsidian
 data.json
