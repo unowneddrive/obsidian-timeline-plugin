@@ -188,12 +188,21 @@ export class TimelineView extends ItemView {
 			const fileContent = await this.app.vault.read(file as any);
 			const lines = fileContent.split('\n');
 
+			console.log('toggleTask called:', { filePath, content, completed });
+			console.log('Looking for line matching:', content);
+
 			// Find the line with the task
 			const lineIndex = lines.findIndex(line => line.trim() === content);
-			if (lineIndex === -1) return;
+			console.log('Found line at index:', lineIndex);
+
+			if (lineIndex === -1) {
+				console.log('Line not found! Available lines:', lines);
+				return;
+			}
 
 			// Toggle checkbox in the line
 			const line = lines[lineIndex];
+			console.log('Original line:', line);
 			let newLine: string;
 
 			if (completed) {
@@ -204,8 +213,12 @@ export class TimelineView extends ItemView {
 				newLine = line.replace(/^(\s*[-*]\s*)\[.\]/, '$1[ ]');
 			}
 
+			console.log('New line after replace:', newLine);
+			console.log('Line changed:', line !== newLine);
+
 			lines[lineIndex] = newLine;
 			await this.app.vault.modify(file as any, lines.join('\n'));
+			console.log('File modified successfully');
 
 			// Update UI directly without full reload
 			// Find the task element by iterating instead of using complex selector
