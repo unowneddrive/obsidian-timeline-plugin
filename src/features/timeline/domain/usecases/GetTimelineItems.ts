@@ -7,6 +7,18 @@ export class GetTimelineItems {
 	async execute(showProjects: boolean, showTasks: boolean): Promise<TimelineItem[]> {
 		const items = await this.repository.getTimelineItems(showProjects, showTasks);
 
+		// Debug: log all items
+		console.log('[Timeline Items Debug] Total items:', items.length);
+		items.forEach((item, index) => {
+			console.log(`[Timeline Item ${index}]`, {
+				title: item.title,
+				type: item.type,
+				startDate: item.startDate?.toISOString(),
+				endDate: item.endDate?.toISOString(),
+				file: item.file
+			});
+		});
+
 		// Sort by start date
 		return items.sort((a, b) => {
 			if (!a.startDate && !b.startDate) return 0;
