@@ -27,11 +27,11 @@ export class TimeScaleRenderer {
 			monthLabel.style.width = `${span.days * 40}px`;
 		}
 
-		// Render day labels
+		// Render day labels - use bounds.totalDays to ensure consistency
 		const currentDate = new Date(bounds.start);
-		const endTime = bounds.end.getTime();
+		currentDate.setHours(0, 0, 0, 0);
 
-		while (currentDate.getTime() <= endTime) {
+		for (let i = 0; i < bounds.totalDays; i++) {
 			const dayLabel = dayRow.createEl('div', { cls: 'gantt-day-label' });
 			dayLabel.textContent = currentDate.getDate().toString();
 			// Use milliseconds for reliable date increment
@@ -42,11 +42,11 @@ export class TimeScaleRenderer {
 	private calculateYearSpans(bounds: TimelineBounds): Array<{ year: number; days: number }> {
 		const spans: Array<{ year: number; days: number }> = [];
 		const currentDate = new Date(bounds.start);
-		const endTime = bounds.end.getTime();
+		currentDate.setHours(0, 0, 0, 0);
 		let currentYear = currentDate.getFullYear();
 		let dayCount = 0;
 
-		while (currentDate.getTime() <= endTime) {
+		for (let i = 0; i < bounds.totalDays; i++) {
 			const year = currentDate.getFullYear();
 			if (year !== currentYear) {
 				spans.push({ year: currentYear, days: dayCount });
@@ -68,12 +68,12 @@ export class TimeScaleRenderer {
 	private calculateMonthSpans(bounds: TimelineBounds): Array<{ month: string; days: number }> {
 		const spans: Array<{ month: string; days: number }> = [];
 		const currentDate = new Date(bounds.start);
-		const endTime = bounds.end.getTime();
+		currentDate.setHours(0, 0, 0, 0);
 		let currentMonth = currentDate.getMonth();
 		let currentYear = currentDate.getFullYear();
 		let dayCount = 0;
 
-		while (currentDate.getTime() <= endTime) {
+		for (let i = 0; i < bounds.totalDays; i++) {
 			const month = currentDate.getMonth();
 			const year = currentDate.getFullYear();
 
