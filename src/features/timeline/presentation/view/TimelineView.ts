@@ -284,12 +284,19 @@ export class TimelineView extends ItemView {
 			// Set flag to prevent re-render on modify event
 			this.isUpdatingDates = true;
 
-			// Update the dates in the file
-			await this.updateTimelineItemDates.execute(item, newStartDate, newEndDate);
+			// Update the dates in the file and get new content for tasks
+			const newContent = await this.updateTimelineItemDates.execute(item, newStartDate, newEndDate);
 
 			// Update the item dates in memory to reflect changes
 			item.startDate = newStartDate;
 			item.endDate = newEndDate;
+
+			// Update task content if applicable
+			if (newContent && item.type === 'task') {
+				item.content = newContent;
+				// Update the DOM data attribute
+				this.updateTaskContentAttribute(item, newContent);
+			}
 
 			// Update tooltip without full re-render
 			this.updateBarTooltip(item);
@@ -298,6 +305,25 @@ export class TimelineView extends ItemView {
 		} finally {
 			// Ensure flag is always reset
 			this.isUpdatingDates = false;
+		}
+	}
+
+	private updateTaskContentAttribute(item: any, newContent: string) {
+		// Find the bar content element for this task
+		const wrappers = Array.from(this.containerEl.querySelectorAll('.gantt-bar-wrapper'));
+
+		for (const wrapper of wrappers) {
+			const content = wrapper.querySelector('.gantt-bar-content');
+			if (content) {
+				const file = content.getAttribute('data-task-file');
+				const title = wrapper.querySelector('.gantt-bar-title')?.textContent;
+
+				if (file === item.file || title === item.title) {
+					// Update the data-task-content attribute
+					content.setAttribute('data-task-content', newContent);
+					break;
+				}
+			}
 		}
 	}
 

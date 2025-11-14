@@ -22,7 +22,7 @@ export class UpdateTimelineItemDates {
 		item: TimelineItem,
 		newStartDate: Date,
 		newEndDate: Date
-	): Promise<void> {
+	): Promise<string | null> {
 		const file = this.app.vault.getAbstractFileByPath(item.file);
 		if (!file || !(file instanceof TFile)) {
 			throw new Error(`File not found: ${item.file}`);
@@ -30,9 +30,12 @@ export class UpdateTimelineItemDates {
 
 		if (item.type === 'project') {
 			await this.updateProjectDates(file, newStartDate, newEndDate);
+			return null;
 		} else if (item.type === 'task') {
-			await this.updateTaskDates(file, item, newStartDate, newEndDate);
+			return await this.updateTaskDates(file, item, newStartDate, newEndDate);
 		}
+
+		return null;
 	}
 
 	private async updateProjectDates(
@@ -120,7 +123,7 @@ export class UpdateTimelineItemDates {
 		item: TimelineItem,
 		newStartDate: Date,
 		newEndDate: Date
-	): Promise<void> {
+	): Promise<string> {
 		if (!item.content) {
 			throw new Error('Task content not found');
 		}
@@ -135,6 +138,7 @@ export class UpdateTimelineItemDates {
 		}
 
 		const line = lines[lineIndex];
+		let newLine: string;
 
 		// Replace dates in the line
 		// Pattern: YYYY-MM-DD
@@ -150,15 +154,15 @@ export class UpdateTimelineItemDates {
 
 			const beforeTask = line.substring(0, taskIndex);
 			const afterTask = line.substring(taskIndex);
-			lines[lineIndex] = `${beforeTask}${this.formatDate(newStartDate)} ${this.formatDate(newEndDate)} ${afterTask}`;
+			newLine = `${beforeTask}${this.formatDate(newStartDate)} ${this.formatDate(newEndDate)} ${afterTask}`;
 		} else if (matches.length === 1) {
 			// One date - update it and add the second one
 			const newDates = `${this.formatDate(newStartDate)} ${this.formatDate(newEndDate)}`;
-			lines[lineIndex] = line.replace(datePattern, newDates);
+			newLine = line.replace(datePattern, newDates);
 		} else {
 			// Two or more dates - update first two
 			let dateCount = 0;
-			lines[lineIndex] = line.replace(datePattern, (match) => {
+			newLine = line.replace(datePattern, (match) => {
 				if (dateCount === 0) {
 					dateCount++;
 					return this.formatDate(newStartDate);
@@ -170,6 +174,10 @@ export class UpdateTimelineItemDates {
 			});
 		}
 
+		lines[lineIndex] = newLine;
 		await this.app.vault.modify(file, lines.join('\n'));
+
+		// Return the new line content (trimmed)
+		return newLine.trim();
 	}
 }
