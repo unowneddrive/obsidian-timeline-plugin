@@ -287,14 +287,53 @@ export class TimelineView extends ItemView {
 			// Update the dates in the file
 			await this.updateTimelineItemDates.execute(item, newStartDate, newEndDate);
 
-			// Re-render timeline to reflect changes
-			await this.renderTimeline();
+			// Update the item dates in memory to reflect changes
+			item.startDate = newStartDate;
+			item.endDate = newEndDate;
+
+			// Update tooltip without full re-render
+			this.updateBarTooltip(item);
 		} catch (error) {
 			console.error('Failed to update bar dates:', error);
 		} finally {
 			// Ensure flag is always reset
 			this.isUpdatingDates = false;
 		}
+	}
+
+	private updateBarTooltip(item: any) {
+		// Find the bar wrapper for this item
+		const wrappers = Array.from(this.containerEl.querySelectorAll('.gantt-bar-wrapper'));
+
+		for (const wrapper of wrappers) {
+			const content = wrapper.querySelector('.gantt-bar-content');
+			if (content) {
+				const file = content.getAttribute('data-task-file') || content.getAttribute('data-file');
+				const title = wrapper.querySelector('.gantt-bar-title')?.textContent;
+
+				if (file === item.file || title === item.title) {
+					// Update tooltip
+					const tooltip = wrapper.querySelector('.gantt-bar-tooltip');
+					if (tooltip) {
+						const duration = (item.endDate.getTime() - item.startDate.getTime()) / (1000 * 60 * 60 * 24);
+						const startStr = this.formatDateForTooltip(item.startDate);
+						const endStr = this.formatDateForTooltip(item.endDate);
+
+						tooltip.innerHTML = `
+							<strong>${item.title}</strong><br>
+							${startStr} - ${endStr}<br>
+							<span class="tooltip-duration">${Math.ceil(duration)} day${duration > 1 ? 's' : ''}</span>
+						`;
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	private formatDateForTooltip(date: Date): string {
+		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 	}
 
 	async onClose() {
