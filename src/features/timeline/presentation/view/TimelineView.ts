@@ -1,10 +1,12 @@
 import { ItemView, WorkspaceLeaf, App, TFile } from 'obsidian';
 import { GetTimelineItems } from '../../domain/usecases/GetTimelineItems';
 import { CalculateTimelineBounds } from '../../domain/usecases/CalculateTimelineBounds';
+import { UpdateTimelineItemDates } from '../../domain/usecases/UpdateTimelineItemDates';
 import { ObsidianTimelineRepository } from '../../data/repositories/ObsidianTimelineRepository';
 import { TimeScaleRenderer } from '../components/TimeScaleRenderer';
 import { GridRenderer } from '../components/GridRenderer';
 import { BarRenderer, BarColors } from '../components/BarRenderer';
+import { BarResizeController } from '../components/BarResizeController';
 import { TimelineScrollController } from '../components/TimelineScrollController';
 import { PluginSettings } from '../../../../core/domain/entities/PluginSettings';
 
@@ -14,11 +16,14 @@ export class TimelineView extends ItemView {
 	private settings: PluginSettings;
 	private getTimelineItems: GetTimelineItems;
 	private calculateTimelineBounds: CalculateTimelineBounds;
+	private updateTimelineItemDates: UpdateTimelineItemDates;
 	private timeScaleRenderer: TimeScaleRenderer;
 	private gridRenderer: GridRenderer;
 	private barRenderer: BarRenderer;
+	private barResizeController: BarResizeController;
 	private scrollController: TimelineScrollController;
 	private isUpdatingTask: boolean = false;
+	private isUpdatingDates: boolean = false;
 
 	constructor(leaf: WorkspaceLeaf, settings: PluginSettings) {
 		super(leaf);
@@ -28,13 +33,22 @@ export class TimelineView extends ItemView {
 		const repository = new ObsidianTimelineRepository(this.app, settings);
 		this.getTimelineItems = new GetTimelineItems(repository);
 		this.calculateTimelineBounds = new CalculateTimelineBounds();
+		this.updateTimelineItemDates = new UpdateTimelineItemDates(this.app, settings);
+
+		// Initialize resize controller
+		this.barResizeController = new BarResizeController(async (item, newStartDate, newEndDate) => {
+			await this.updateBarDates(item, newStartDate, newEndDate);
+		});
 
 		// Initialize renderers
 		this.timeScaleRenderer = new TimeScaleRenderer();
 		this.gridRenderer = new GridRenderer();
-		this.barRenderer = new BarRenderer((filePath, content, completed) => {
-			this.toggleTask(filePath, content, completed);
-		});
+		this.barRenderer = new BarRenderer(
+			(filePath, content, completed) => {
+				this.toggleTask(filePath, content, completed);
+			},
+			this.barResizeController
+		);
 		this.scrollController = new TimelineScrollController();
 	}
 
@@ -56,7 +70,7 @@ export class TimelineView extends ItemView {
 		// Re-render on file changes
 		this.registerEvent(
 			this.app.vault.on('modify', () => {
-				if (!this.isUpdatingTask) {
+				if (!this.isUpdatingTask && !this.isUpdatingDates) {
 					this.renderTimeline();
 				}
 			})
@@ -265,7 +279,26 @@ export class TimelineView extends ItemView {
 		}
 	}
 
+	private async updateBarDates(item: any, newStartDate: Date, newEndDate: Date) {
+		try {
+			// Set flag to prevent re-render on modify event
+			this.isUpdatingDates = true;
+
+			// Update the dates in the file
+			await this.updateTimelineItemDates.execute(item, newStartDate, newEndDate);
+
+			// Re-render timeline to reflect changes
+			await this.renderTimeline();
+		} catch (error) {
+			console.error('Failed to update bar dates:', error);
+		} finally {
+			// Ensure flag is always reset
+			this.isUpdatingDates = false;
+		}
+	}
+
 	async onClose() {
-		// Cleanup if needed
+		// Cleanup resize controller
+		this.barResizeController.cleanup();
 	}
 }

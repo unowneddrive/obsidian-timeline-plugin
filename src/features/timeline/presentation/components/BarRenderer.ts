@@ -1,6 +1,7 @@
 import { TimelineItem } from '../../domain/entities/TimelineItem';
 import { TimelineBounds } from '../../domain/entities/TimelineBounds';
 import { DateFormatter } from '../utils/DateFormatter';
+import { BarResizeController } from './BarResizeController';
 
 export interface BarColors {
 	projectColor: string;
@@ -10,10 +11,15 @@ export interface BarColors {
 export class BarRenderer {
 	private dateFormatter: DateFormatter;
 	private onTaskToggle?: (filePath: string, content: string, completed: boolean) => void;
+	private resizeController?: BarResizeController;
 
-	constructor(onTaskToggle?: (filePath: string, content: string, completed: boolean) => void) {
+	constructor(
+		onTaskToggle?: (filePath: string, content: string, completed: boolean) => void,
+		resizeController?: BarResizeController
+	) {
 		this.dateFormatter = new DateFormatter();
 		this.onTaskToggle = onTaskToggle;
+		this.resizeController = resizeController;
 	}
 
 	createBar(item: TimelineItem, bounds: TimelineBounds, colors: BarColors, onFileClick?: (filePath: string) => void): HTMLElement {
@@ -61,6 +67,7 @@ export class BarRenderer {
 		const barContent = wrapper.createEl('div', { cls: 'gantt-bar-content' });
 		barContent.setAttribute('data-bar-left', leftPx.toString());
 		barContent.setAttribute('data-bar-width', widthPx.toString());
+		barContent.setAttribute('data-file', item.file);
 
 		// Store task info for updates
 		if (item.type === 'task' && item.content) {
@@ -107,6 +114,11 @@ export class BarRenderer {
 			${this.dateFormatter.formatDate(item.startDate)} - ${this.dateFormatter.formatDate(item.endDate)}<br>
 			<span class="tooltip-duration">${Math.ceil(duration)} day${duration > 1 ? 's' : ''}</span>
 		`;
+
+		// Attach resize handles if controller is available
+		if (this.resizeController) {
+			this.resizeController.attachResizeHandles(wrapper, item, bounds);
+		}
 
 		return wrapper;
 	}
