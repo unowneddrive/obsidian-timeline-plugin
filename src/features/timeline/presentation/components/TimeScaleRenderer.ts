@@ -29,20 +29,24 @@ export class TimeScaleRenderer {
 
 		// Render day labels
 		const currentDate = new Date(bounds.start);
-		while (currentDate <= bounds.end) {
+		const endTime = bounds.end.getTime();
+
+		while (currentDate.getTime() <= endTime) {
 			const dayLabel = dayRow.createEl('div', { cls: 'gantt-day-label' });
 			dayLabel.textContent = currentDate.getDate().toString();
-			currentDate.setDate(currentDate.getDate() + 1);
+			// Use milliseconds for reliable date increment
+			currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
 		}
 	}
 
 	private calculateYearSpans(bounds: TimelineBounds): Array<{ year: number; days: number }> {
 		const spans: Array<{ year: number; days: number }> = [];
 		const currentDate = new Date(bounds.start);
+		const endTime = bounds.end.getTime();
 		let currentYear = currentDate.getFullYear();
 		let dayCount = 0;
 
-		while (currentDate <= bounds.end) {
+		while (currentDate.getTime() <= endTime) {
 			const year = currentDate.getFullYear();
 			if (year !== currentYear) {
 				spans.push({ year: currentYear, days: dayCount });
@@ -50,7 +54,8 @@ export class TimeScaleRenderer {
 				dayCount = 0;
 			}
 			dayCount++;
-			currentDate.setDate(currentDate.getDate() + 1);
+			// Use milliseconds for reliable date increment
+			currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
 		}
 
 		if (dayCount > 0) {
@@ -63,11 +68,12 @@ export class TimeScaleRenderer {
 	private calculateMonthSpans(bounds: TimelineBounds): Array<{ month: string; days: number }> {
 		const spans: Array<{ month: string; days: number }> = [];
 		const currentDate = new Date(bounds.start);
+		const endTime = bounds.end.getTime();
 		let currentMonth = currentDate.getMonth();
 		let currentYear = currentDate.getFullYear();
 		let dayCount = 0;
 
-		while (currentDate <= bounds.end) {
+		while (currentDate.getTime() <= endTime) {
 			const month = currentDate.getMonth();
 			const year = currentDate.getFullYear();
 
@@ -79,7 +85,8 @@ export class TimeScaleRenderer {
 				dayCount = 0;
 			}
 			dayCount++;
-			currentDate.setDate(currentDate.getDate() + 1);
+			// Use milliseconds for reliable date increment
+			currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
 		}
 
 		if (dayCount > 0) {
