@@ -28,8 +28,22 @@ export class CalculateTimelineBounds {
 		const startDate = new Date(Math.min(minDate.getTime() - sixMonthsMs, today.getTime() - sixMonthsMs));
 		const endDate = new Date(Math.max(maxDate.getTime() + sixMonthsMs, today.getTime() + sixMonthsMs));
 
-		const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+		// Calculate total days by iterating (same method as TimeScaleRenderer)
+		const totalDays = this.calculateDaysBetween(startDate, endDate);
 
 		return { start: startDate, end: endDate, totalDays };
+	}
+
+	private calculateDaysBetween(start: Date, end: Date): number {
+		let count = 0;
+		const currentDate = new Date(start);
+		const endTime = end.getTime();
+
+		while (currentDate.getTime() <= endTime) {
+			count++;
+			currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
+		}
+
+		return count;
 	}
 }
